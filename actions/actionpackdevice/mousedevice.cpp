@@ -22,8 +22,8 @@
 
 #include <QCursor>
 
-#ifdef Q_WS_X11
-#include <QX11Info>
+#ifdef Q_OS_UNIX
+#include "platforminfo.h"
 #include <X11/Xlib.h>
 #include <X11/extensions/XTest.h>
 #endif
@@ -67,12 +67,12 @@ bool MouseDevice::isButtonPressed(Button button) const
 		return false;
 	}
 #endif
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 	Window unusedWindow;
 	int unusedInt;
 	unsigned int buttonMask;
-	if(!XQueryPointer(QX11Info::display(),
-					  XDefaultRootWindow(QX11Info::display()),
+    if(!XQueryPointer(ActionTools::PlatformInfo::display(),
+                      XDefaultRootWindow(ActionTools::PlatformInfo::display()),
 					  &unusedWindow,
 					  &unusedWindow,
 					  &unusedInt,
@@ -115,11 +115,11 @@ bool MouseDevice::pressButton(Button button)
 {
 	mPressedButtons[button] = true;
 
-#ifdef Q_WS_X11
-	if(!XTestFakeButtonEvent(QX11Info::display(), toX11Button(button), True, CurrentTime))
+#ifdef Q_OS_UNIX
+    if(!XTestFakeButtonEvent(ActionTools::PlatformInfo::display(), toX11Button(button), True, CurrentTime))
 		return false;
 	
-	XFlush(QX11Info::display());
+    XFlush(ActionTools::PlatformInfo::display());
 #endif
 	
 #ifdef Q_WS_WIN
@@ -142,11 +142,11 @@ bool MouseDevice::releaseButton(Button button)
 {
 	mPressedButtons[button] = false;
 
-#ifdef Q_WS_X11
-	if(!XTestFakeButtonEvent(QX11Info::display(), toX11Button(button), False, CurrentTime))
+#ifdef Q_OS_UNIX
+    if(!XTestFakeButtonEvent(ActionTools::PlatformInfo::display(), toX11Button(button), False, CurrentTime))
 		return false;
 	
-	XFlush(QX11Info::display());
+    XFlush(ActionTools::PlatformInfo::display());
 #endif
 	
 #ifdef Q_WS_WIN
@@ -167,7 +167,7 @@ bool MouseDevice::releaseButton(Button button)
 
 bool MouseDevice::wheel(int intensity) const
 {
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 	int button;
 	if(intensity < 0)
 	{
@@ -181,10 +181,10 @@ bool MouseDevice::wheel(int intensity) const
 
 	for(int i = 0; i < intensity; ++i)
 	{
-		result &= XTestFakeButtonEvent(QX11Info::display(), button, True, CurrentTime);
-		result &= XTestFakeButtonEvent(QX11Info::display(), button, False, CurrentTime);
+        result &= XTestFakeButtonEvent(ActionTools::PlatformInfo::display(), button, True, CurrentTime);
+        result &= XTestFakeButtonEvent(ActionTools::PlatformInfo::display(), button, False, CurrentTime);
 		
-		XFlush(QX11Info::display());
+        XFlush(ActionTools::PlatformInfo::display());
 	}
 
 	if(!result)
@@ -207,7 +207,7 @@ bool MouseDevice::wheel(int intensity) const
 	return true;
 }
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 int MouseDevice::toX11Button(Button button) const
 {
 	return button + 1;

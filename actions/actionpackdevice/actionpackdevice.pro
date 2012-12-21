@@ -3,6 +3,9 @@ include(actions/actions.pri)
 include(code/code.pri)
 TARGET = ActionPackDevice
 QT += script
+greaterThan(QT_MAJOR_VERSION, 4) {
+    QT += widgets
+}
 HEADERS += actionpackdevice.h \
     mousedevice.h \
     keyboarddevice.h

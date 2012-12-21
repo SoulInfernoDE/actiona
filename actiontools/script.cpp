@@ -199,7 +199,7 @@ namespace ActionTools
 		stream.writeStartElement("scriptfile");
 
 		QString osName = tr("Unknown");
-	#ifdef Q_WS_X11
+	#ifdef Q_OS_UNIX
 		osName = tr("GNU/Linux");
 	#endif
 	#ifdef Q_WS_WIN

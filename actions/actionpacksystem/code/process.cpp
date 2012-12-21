@@ -29,7 +29,7 @@
 #include <Windows.h>
 #endif
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 #include <unistd.h>
 #endif
 

@@ -56,6 +56,9 @@ class ActionPackData : public QObject, public ActionTools::ActionPack
 {
 	Q_OBJECT
 	Q_INTERFACES(ActionTools::ActionPack)
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    Q_PLUGIN_METADATA(IID "org.actionaz.Action")
+#endif
 
 public:
 	ActionPackData()								{}
@@ -99,6 +102,8 @@ private:
 	Q_DISABLE_COPY(ActionPackData)
 };
 
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
 Q_EXPORT_PLUGIN2(ActionPackData, ActionPackData)
+#endif
 
 #endif // ACTIONPACKDATA_H

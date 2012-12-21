@@ -36,7 +36,7 @@ AboutDialog::AboutDialog(QWidget *parent)
 #ifdef Q_WS_WIN
 	QString os = tr("Windows");
 #endif
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 	QString os = tr("GNU/Linux");
 #endif
 #ifdef Q_WS_MAC

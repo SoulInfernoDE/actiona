@@ -59,7 +59,7 @@ namespace ActionTools
 #ifdef Q_WS_MAC
 		QString actionMask = "libActionPack*.dylib";
 #endif
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 		QString actionMask = "libActionPack*.so";
 #endif
 

@@ -8,6 +8,9 @@ CONFIG += mobility
 contains(DEFINES, ACT_PROFILE) {
 CONFIG += console
 }
+greaterThan(QT_MAJOR_VERSION, 4) {
+    QT += widgets
+}
 MOBILITY += systeminfo
 TARGET = actionaz
 VERSION = $$ACTIONAZ_VERSION

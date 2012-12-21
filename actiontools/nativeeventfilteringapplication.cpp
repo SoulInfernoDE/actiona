@@ -42,9 +42,11 @@ namespace ActionTools
 		mNativeFilters.removeAll(filter);
 	}
 	
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 	bool NativeEventFilteringApplication::x11EventFilter(XEvent *event)
 	{
+        //TODO
+        /*
 		foreach(NativeEventFilter *filter, mNativeFilters)
 		{
 			if(filter && filter->x11EventFilter(event))
@@ -52,6 +54,9 @@ namespace ActionTools
 		}
 		
 		return QApplication::x11EventFilter(event);
+        */
+
+        return true;
 	}
 #endif
 	

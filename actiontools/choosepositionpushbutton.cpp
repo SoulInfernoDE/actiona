@@ -30,9 +30,9 @@
 #include <QTimer>
 #include <QDebug>
 
-#ifdef Q_WS_X11
-#include <QX11Info>
+#ifdef Q_OS_UNIX
 #include <X11/Xlib.h>
+#include "platforminfo.h"
 #endif
 
 #ifdef Q_WS_WIN
@@ -50,7 +50,7 @@ namespace ActionTools
 	,mPreviousCursor(NULL)
 #endif
 	{
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 		foreach(QWidget *widget, QApplication::topLevelWidgets())
 		{
 			if(QMainWindow *mainWindow = qobject_cast<QMainWindow*>(widget))
@@ -98,7 +98,7 @@ namespace ActionTools
 		mSearching = true;
 		update();
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 		if(mMainWindow)
 			mMainWindow->showMinimized();
 #endif
@@ -114,11 +114,11 @@ namespace ActionTools
 #ifdef Q_WS_WIN
 		mPreviousCursor = SetCursor(newCursor.handle());
 #endif
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 		nativeEventFilteringApp->installNativeEventFilter(this);
 
-		if(XGrabPointer(QX11Info::display(), DefaultRootWindow(QX11Info::display()), True, ButtonReleaseMask, GrabModeAsync, GrabModeAsync,
-						None, newCursor.handle(), CurrentTime) != GrabSuccess)
+        if(XGrabPointer(PlatformInfo::display(), DefaultRootWindow(PlatformInfo::display()), True, ButtonReleaseMask, GrabModeAsync, GrabModeAsync,
+                        None, PlatformInfo::cursorNativeHandle(newCursor), CurrentTime) != GrabSuccess)
 		{
 			QMessageBox::warning(this, tr("Choose a window"), tr("Unable to grab the pointer."));
 			event->ignore();
@@ -137,7 +137,7 @@ namespace ActionTools
 	}
 #endif
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 	bool ChoosePositionPushButton::x11EventFilter(XEvent *event)
 	{
 		if(event->type == ButtonRelease)
@@ -165,8 +165,8 @@ namespace ActionTools
 		foreach(QWidget *widget, qApp->topLevelWidgets())
 			widget->setWindowOpacity(1.0f);
 #endif
-#ifdef Q_WS_X11
-		XUngrabPointer(QX11Info::display(), CurrentTime);
+#ifdef Q_OS_UNIX
+        XUngrabPointer(PlatformInfo::display(), CurrentTime);
 
 		nativeEventFilteringApp->removeNativeEventFilter(this);
 

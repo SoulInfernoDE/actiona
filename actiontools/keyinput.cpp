@@ -25,14 +25,14 @@
 #include <QKeySequence>
 #include <QDebug>
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 #define XK_MISCELLANY
 #define XK_LATIN1
 #define XK_KOREAN
 #define XK_XKB_KEYS
 #include <X11/keysymdef.h>
 #include <X11/XF86keysym.h>
-#include <QX11Info>
+#include "platforminfo.h"
 #endif
 #ifdef Q_WS_WIN
 #include <Windows.h>
@@ -206,7 +206,7 @@ namespace ActionTools
 
 		mNativeKey[InvalidKey] = 0;
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 		mNativeKey[ShiftLeft] = XK_Shift_L;
 		mNativeKey[ShiftRight] = XK_Shift_R;
 		mNativeKey[ControlLeft] = XK_Control_L;

@@ -22,9 +22,9 @@
 #include "globalshortcuttrigger.h"
 
 #include <QWidget>
-#include <QX11Info>
 #include <QKeyEvent>
 #include <QCoreApplication>
+#include "platforminfo.h"
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -130,8 +130,8 @@ namespace ActionTools
 		{
 			if (haveMods)
 				return;
-	
-			Display* appDpy = QX11Info::display();
+
+            Display* appDpy = PlatformInfo::display();
 			XModifierKeymap* map = XGetModifierMapping(appDpy);
 			if (map) {
 				// XKeycodeToKeysym helper code adapeted from xmodmap
@@ -193,7 +193,7 @@ namespace ActionTools
 	public:
 		static bool convertKeySequence(const QKeySequence& ks, unsigned int* _mod, Qt_XK_Keygroup* _kg)
 		{
-			int code = ks;
+            int code = (ks.count() >= 1) ? ks[0] : 0;
 			ensureModifiers();
 	
 			unsigned int mod = 0;
@@ -276,7 +276,7 @@ namespace ActionTools
 	
 		void bind(int keysym, unsigned int mod)
 		{
-			int code = XKeysymToKeycode(QX11Info::display(), keysym);
+            int code = XKeysymToKeycode(PlatformInfo::display(), keysym);
 	
 			// don't grab keys with empty code (because it means just the modifier key)
 			if (keysym && !code)
@@ -284,15 +284,15 @@ namespace ActionTools
 	
 			failed = false;
 			XErrorHandler savedErrorHandler = XSetErrorHandler(XGrabErrorHandler);
-			WId w = QX11Info::appRootWindow();
+            WId w = PlatformInfo::appRootWindow();
 			foreach(long mask_mod, X11KeyTriggerManager::ignModifiersList()) {
-				XGrabKey(QX11Info::display(), code, mod | mask_mod, w, False, GrabModeAsync, GrabModeAsync);
+                XGrabKey(PlatformInfo::display(), code, mod | mask_mod, w, False, GrabModeAsync, GrabModeAsync);
 				GrabbedKey grabbedKey;
 				grabbedKey.code = code;
 				grabbedKey.mod  = mod | mask_mod;
 				grabbedKeys_ << grabbedKey;
 			}
-			XSync(QX11Info::display(), False);
+            XSync(PlatformInfo::display(), False);
 			XSetErrorHandler(savedErrorHandler);
 		}
 	
@@ -302,7 +302,7 @@ namespace ActionTools
 		 */
 		Impl(GlobalShortcutManager::KeyTrigger* t, const QKeySequence& ks)
 			: trigger_(t)
-			, qkey_(ks)
+            , qkey_((ks.count() >= 1) ? ks[0] : 0)
 		{
 			X11KeyTriggerManager::instance()->addTrigger(this);
 	
@@ -321,7 +321,7 @@ namespace ActionTools
 			X11KeyTriggerManager::instance()->removeTrigger(this);
 	
 			foreach(GrabbedKey key, grabbedKeys_)
-				XUngrabKey(QX11Info::display(), key.code, key.mod, QX11Info::appRootWindow());
+                XUngrabKey(PlatformInfo::display(), key.code, key.mod, PlatformInfo::appRootWindow());
 		}
 	
 		void activate()

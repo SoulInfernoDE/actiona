@@ -37,7 +37,7 @@ namespace ActionTools
 				app->removeNativeEventFilter(this);
 		}
 		
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 		virtual bool x11EventFilter(XEvent*)
 		{
 			return false;

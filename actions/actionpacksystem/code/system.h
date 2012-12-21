@@ -27,6 +27,10 @@
 #include <QScriptValue>
 #include <QScriptEngine>
 #include <QStringList>
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+
+#else
 #include <qmobilityglobal.h>
 
 QTM_BEGIN_NAMESPACE
@@ -35,6 +39,7 @@ class QSystemStorageInfo;
 class QSystemDisplayInfo;
 class QSystemDeviceInfo;
 QTM_END_NAMESPACE
+#endif
 
 class SystemSession;
 
@@ -122,10 +127,14 @@ namespace Code
 		
 	private:
 		SystemSession *mSystemSession;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+
+#else
 		QTM_PREPEND_NAMESPACE(QSystemInfo) *mSystemInfo;
 		QTM_PREPEND_NAMESPACE(QSystemStorageInfo) *mSystemStorageInfo;
 		QTM_PREPEND_NAMESPACE(QSystemDisplayInfo) *mSystemDisplayInfo;
 		QTM_PREPEND_NAMESPACE(QSystemDeviceInfo) *mSystemDeviceInfo;
+#endif
 	};
 }
 

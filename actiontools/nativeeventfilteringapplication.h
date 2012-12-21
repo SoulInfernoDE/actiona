@@ -24,6 +24,10 @@
 #include "actiontools_global.h"
 #include "qtsingleapplication/qtsingleapplication.h"
 
+#ifdef Q_OS_UNIX
+typedef union _XEvent XEvent;
+#endif
+
 #define nativeEventFilteringApp (ActionTools::NativeEventFilteringApplication::instance())
 
 namespace ActionTools
@@ -46,7 +50,7 @@ namespace ActionTools
 		}
 		
 	private:
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 		bool x11EventFilter(XEvent *event);
 #endif
 #ifdef Q_WS_WIN

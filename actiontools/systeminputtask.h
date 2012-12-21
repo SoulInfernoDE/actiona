@@ -28,7 +28,7 @@
 
 class QThread;
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 class QTimer;
 #endif
 
@@ -64,7 +64,7 @@ namespace ActionTools
 			void stop();
 
 		private slots:
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 			void processReplies();
 #endif
 
@@ -73,7 +73,7 @@ namespace ActionTools
 
 			QThread *mThread;
 			bool mStarted;
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 			QTimer *mProcessRepliesTimer;
 #endif
 		};

@@ -31,6 +31,10 @@
 #include <QAuthenticator>
 #include <QDebug>
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#include <QUrlQuery>
+#endif
+
 namespace Code
 {
 	QScriptValue Web::constructor(QScriptContext *context, QScriptEngine *engine)
@@ -97,6 +101,12 @@ namespace Code
 		}
 
 		QUrl url(urlString);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+        QUrlQuery urlQuery;
+        QUrlQuery postData;
+#else
+        QByteArray postData;
+#endif
 		if(url.scheme() == QString())
 			url = QUrl("http://" + urlString, QUrl::TolerantMode);
 
@@ -104,7 +114,6 @@ namespace Code
 
 		QScriptValueIterator it(options);
 		Method method = Get;
-		QByteArray postData;
 
 		while(it.hasNext())
 		{
@@ -128,16 +137,26 @@ namespace Code
 			else if(it.name() == "postData")
 			{
 				QScriptValueIterator postDataIt(it.value());
-				QUrl postDataParameters;
 
-				while(postDataIt.hasNext())
-				{
-					postDataIt.next();
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+                while(postDataIt.hasNext())
+                {
+                    postDataIt.next();
 
-					postDataParameters.addQueryItem(postDataIt.name(), postDataIt.value().toString());
-				}
+                    postData.addQueryItem(postDataIt.name(), postDataIt.value().toString());
+                }
+#else
+                QUrl postDataParameters;
 
-				postData = postDataParameters.encodedQuery();
+                while(postDataIt.hasNext())
+                {
+                    postDataIt.next();
+
+                    postDataParameters.addQueryItem(postDataIt.name(), postDataIt.value().toString());
+                }
+
+                postData = postDataParameters.encodedQuery();
+#endif
 			}
 			else if(it.name() == "query")
 			{
@@ -147,7 +166,11 @@ namespace Code
 				{
 					queryIt.next();
 
-					url.addQueryItem(queryIt.name(), queryIt.value().toString());
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+                    urlQuery.addQueryItem(queryIt.name(), queryIt.value().toString());
+#else
+                    url.addQueryItem(queryIt.name(), queryIt.value().toString());
+#endif
 				}
 			}
 			else if(it.name() == "user")
@@ -160,12 +183,19 @@ namespace Code
 			}
 		}
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+        url.setQuery(urlQuery);
+#endif
 		request.setUrl(url);
 
 		switch(method)
 		{
 		case Post:
-			mNetworkReply = mNetworkAccessManager->post(request, postData);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+            mNetworkReply = mNetworkAccessManager->post(request, postData.toString(QUrl::FullyEncoded).toLatin1());
+#else
+            mNetworkReply = mNetworkAccessManager->post(request, postData);
+#endif
 			break;
 		case Get:
 		default:

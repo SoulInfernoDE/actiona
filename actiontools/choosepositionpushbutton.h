@@ -48,7 +48,7 @@ namespace ActionTools
 #ifdef Q_WS_WIN
 		void mouseReleaseEvent(QMouseEvent *event);
 #endif
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 		bool x11EventFilter(XEvent *event);
 #endif
 		void stopMouseCapture();

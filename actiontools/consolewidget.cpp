@@ -32,9 +32,14 @@ namespace ActionTools
 	{
 		ui->setupUi(this);
 		
-		ui->console->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-		ui->console->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-		
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+        ui->console->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+        ui->console->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+#else
+        ui->console->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+        ui->console->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+#endif
+
 		ui->clearPushButton->setEnabled(false);
 	}
 

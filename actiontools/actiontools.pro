@@ -3,6 +3,9 @@ QT += script \
     xmlpatterns
 TEMPLATE = lib
 CONFIG += dll
+greaterThan(QT_MAJOR_VERSION, 4) {
+    QT += widgets gui-private
+}
 unix:CONFIG += link_pkgconfig
 unix:PKGCONFIG += opencv
 DEFINES += ACTIONTOOLS_LIBRARY
@@ -45,7 +48,8 @@ SOURCES += actionfactory.cpp \
 	opencvalgorithms.cpp \
     systeminputreceiver.cpp \
     systeminputtask.cpp \
-	systeminputrecorder.cpp
+	systeminputrecorder.cpp \
+    platforminfo.cpp
 HEADERS += actiontools_global.h \
     actionpack.h \
     actionfactory.h \
@@ -87,7 +91,8 @@ HEADERS += actiontools_global.h \
     systeminputtask.h \
     systeminputlistener.h \
     systeminput.h \
-	systeminputrecorder.h
+	systeminputrecorder.h \
+    platforminfo.h
 win32:LIBS += -luser32 \
     -ladvapi32 \
     -lgdi32 \

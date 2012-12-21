@@ -3,6 +3,9 @@ include(actions/actions.pri)
 include(code/code.pri)
 TARGET = ActionPackData
 QT += script network sql
+greaterThan(QT_MAJOR_VERSION, 4) {
+    QT += widgets
+}
 HEADERS += actionpackdata.h
 INCLUDEPATH += ../../3rdparty/rudeconfig
 LIBS += -L../.. -lrudeconfig

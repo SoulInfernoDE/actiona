@@ -72,14 +72,20 @@
 #include <QProcess>
 #include <QTemporaryFile>
 #include <QListWidget>
-#include <QSystemInfo>
-#include <QScriptValueIterator>
 
-#ifdef Q_WS_X11
-#include <QX11Info>
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+#include <QSystemInfo>
 #endif
 
+#include <QScriptValueIterator>
+
+#ifdef Q_OS_UNIX
+#include "platforminfo.h"
+#endif
+
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
 QTM_USE_NAMESPACE
+#endif
 
 MainWindow::MainWindow(QxtCommandOptions *commandOptions, ProgressSplashScreen *splashScreen, const QString &startScript, const QString &usedLocale)
 	: QMainWindow(0),
@@ -181,7 +187,11 @@ MainWindow::MainWindow(QxtCommandOptions *commandOptions, ProgressSplashScreen *
 
 	mScriptModel->setSelectionModel(ui->scriptView->selectionModel());
 
-	ui->scriptView->horizontalHeader()->setMovable(true);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    ui->scriptView->horizontalHeader()->setSectionsMovable(true);
+#else
+    ui->scriptView->horizontalHeader()->setMovable(true);
+#endif
 	ui->actionQuit->setShortcut(QKeySequence(tr("Alt+F4")));
 	readSettings();
 
@@ -223,21 +233,14 @@ MainWindow::MainWindow(QxtCommandOptions *commandOptions, ProgressSplashScreen *
 
 	QTimer::singleShot(1, this, SLOT(postInit()));
 
-	bool isCompositingManagerRunning = true;
+#ifdef Q_OS_WIN
+    connect(mOpacityTimer, SIGNAL(timeout()), this, SLOT(opacityOpenUpdate()));
 
-#ifdef Q_WS_X11
-	isCompositingManagerRunning = QX11Info::isCompositingManagerRunning();
+    mOpacityTimer->setSingleShot(false);
+    mOpacityTimer->start(25);
+#else
+    setWindowOpacity(1.0f);
 #endif
-
-	if(isCompositingManagerRunning)
-	{
-		connect(mOpacityTimer, SIGNAL(timeout()), this, SLOT(opacityOpenUpdate()));
-
-		mOpacityTimer->setSingleShot(false);
-		mOpacityTimer->start(25);
-	}
-	else
-		setWindowOpacity(1.0f);
 }
 
 MainWindow::~MainWindow()
@@ -354,7 +357,7 @@ void MainWindow::postInit()
 		mSplashScreen = 0;
 	}
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 	ActionTools::CrossPlatform::setForegroundWindow(this);
 #endif
 
@@ -989,8 +992,15 @@ void MainWindow::on_actionCreate_shortcut_triggered()
 			return;
 	}
 
-	QString defaultDestination = QDir(QDesktopServices::storageLocation(QDesktopServices::DesktopLocation))
-								 .filePath(QFileInfo(mCurrentFile).fileName());
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    QStringList desktopDirectories = QStandardPaths::standardLocations(QStandardPaths::DesktopLocation);
+    QString defaultDestination;
+    if(desktopDirectories.size() > 0)
+        defaultDestination = QDir(desktopDirectories.first()).filePath(QFileInfo(mCurrentFile).fileName());
+#else
+    QString defaultDestination = QDir(QDesktopServices::storageLocation(QDesktopServices::DesktopLocation))
+                                 .filePath(QFileInfo(mCurrentFile).fileName());
+#endif
 
 	QString filePath = QFileDialog::getSaveFileName(this, tr("Choose the shortcut destination"), defaultDestination);
 	if(filePath.isEmpty())
@@ -1303,7 +1313,15 @@ void MainWindow::checkForUpdate(bool silent)
 	mUpdaterProgressDialog->open(this, SLOT(updateCanceled()));
 	mUpdaterProgressDialog->setWindowTitle(tr("Checking for updates"));
 	mSilentUpdate = silent;
-	mUpdater->checkForUpdates("actionaz3", Global::ACTIONAZ_VERSION, Tools::Updater::Binary, Tools::Updater::Installer, Global::currentOSType(), Global::currentOSBits(), QSystemInfo().currentLanguage());
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    QString currentLanguage = QLocale::system().name().left(2);
+    if (currentLanguage.isEmpty() || currentLanguage == QLatin1String("C"))
+        currentLanguage = QLatin1String("en");
+
+    mUpdater->checkForUpdates("actionaz3", Global::ACTIONAZ_VERSION, Tools::Updater::Binary, Tools::Updater::Installer, Global::currentOSType(), Global::currentOSBits(), currentLanguage);
+#else
+    mUpdater->checkForUpdates("actionaz3", Global::ACTIONAZ_VERSION, Tools::Updater::Binary, Tools::Updater::Installer, Global::currentOSType(), Global::currentOSBits(), QSystemInfo().currentLanguage());
+#endif
 }
 #endif
 
@@ -1742,9 +1760,19 @@ void MainWindow::updateSuccess(const Tools::Version &version,
 	QString updateFilename;
 	if(changelogDialog.changelogAction() == ChangelogDialog::DownloadOnly)
 	{
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    QStringList desktopDirectories = QStandardPaths::standardLocations(QStandardPaths::DesktopLocation);
+    QString defaultDestination;
+    if(desktopDirectories.size() > 0)
+        defaultDestination = QDir(desktopDirectories.first()).filePath(QFileInfo(filename).fileName());
+#else
+    QString defaultDestination = QDir(QDesktopServices::storageLocation(QDesktopServices::DesktopLocation))
+                                 .filePath(QFileInfo(filename).fileName());
+#endif
+
 		updateFilename = QFileDialog::getSaveFileName(	this,
 									tr("Select where to save the installation file"),
-									QDir(QDesktopServices::storageLocation(QDesktopServices::DesktopLocation)).filePath(QFileInfo(filename).fileName()));
+                                    defaultDestination);
 		mInstallAfterUpdateDownload = false;
 	}
 	else if(changelogDialog.changelogAction() == ChangelogDialog::DownloadAndInstall)
@@ -2057,21 +2085,14 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	{
 		writeSettings();
 
-		bool isCompositingManagerRunning = true;
+#ifdef Q_OS_WIN
+        mOpacityTimer->start(25);
+        connect(mOpacityTimer, SIGNAL(timeout()), this, SLOT(opacityCloseUpdate()));
 
-	#ifdef Q_WS_X11
-		isCompositingManagerRunning = QX11Info::isCompositingManagerRunning();
-	#endif
-
-		if(isCompositingManagerRunning)
-		{
-			mOpacityTimer->start(25);
-			connect(mOpacityTimer, SIGNAL(timeout()), this, SLOT(opacityCloseUpdate()));
-
-			event->ignore();//Ignore, since we have to wait until the fade out is done
-		}
-		else
-			QApplication::quit();
+        event->ignore();//Ignore, since we have to wait until the fade out is done
+#else
+        QApplication::quit();
+#endif
 	}
 	else
 		event->ignore();

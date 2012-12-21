@@ -73,8 +73,7 @@ namespace Code
 		{
 		case Native:
 			return string.toLocal8Bit();
-		case Ascii:
-			return string.toAscii();
+        case Ascii:
 		case Latin1:
 			return string.toLatin1();
 		case UTF8:
@@ -90,8 +89,7 @@ namespace Code
 		{
 		case Native:
 			return QString::fromLocal8Bit(byteArray.data(), byteArray.size());
-		case Ascii:
-			return QString::fromAscii(byteArray.data(), byteArray.size());
+        case Ascii:
 		case Latin1:
 			return QString::fromLatin1(byteArray.data(), byteArray.size());
 		case UTF8:

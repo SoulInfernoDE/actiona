@@ -470,7 +470,7 @@ void ActionDialog::currentExceptionActionChanged(int index)
 
 void ActionDialog::addParameter(ActionTools::ParameterDefinition *parameter, int tab)
 {
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 	if(!(parameter->operatingSystems() & ActionTools::WorksOnGnuLinux))
 		return;
 #endif

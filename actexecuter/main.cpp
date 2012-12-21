@@ -39,8 +39,11 @@
 #include <QLibraryInfo>
 #include <QUrl>
 #include <QNetworkProxy>
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#include <QUrlQuery>
+#endif
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 #undef signals
 #include <libnotify/notify.h>
 #define signals
@@ -105,11 +108,13 @@ int main(int argc, char **argv)
 
 	qsrand(std::time(NULL));
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 	notify_init("Actionaz executer");
 #endif
 
-	QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
+#endif
 
 	const QStringList &arguments = QCoreApplication::arguments();
 
@@ -240,7 +245,7 @@ int main(int argc, char **argv)
 	if(!options.count("nocodeqt"))
 		app.addLibraryPath(QApplication::applicationDirPath() + "/code");
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 	{
 #ifdef ACT_PROFILE
 		Tools::HighResolutionTimer timer("Load key codes");
@@ -326,7 +331,11 @@ int main(int argc, char **argv)
 	{
 		QString mode;
 		typedef QPair<QString, QString> QStringPair;
-		foreach(const QStringPair &queryItem, protocolUrl.queryItems())
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+        foreach(const QStringPair &queryItem, QUrlQuery(protocolUrl.query()).queryItems())
+#else
+        foreach(const QStringPair &queryItem, protocolUrl.queryItems())
+#endif
 		{
 			if(queryItem.first == "mode")
 			{

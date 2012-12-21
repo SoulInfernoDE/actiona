@@ -3,6 +3,9 @@ include(actions/actions.pri)
 include(code/code.pri)
 TARGET = ActionPackSystem
 QT += script
+greaterThan(QT_MAJOR_VERSION, 4) {
+	QT += widgets multimedia multimediawidgets
+}
 unix:QT += dbus
 HEADERS += actionpacksystem.h \
     systemsession.h

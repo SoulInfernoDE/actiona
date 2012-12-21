@@ -43,7 +43,7 @@
 #include <QLibraryInfo>
 #include <QSettings>
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 #undef signals
 #include <libnotify/notify.h>
 #define signals
@@ -91,7 +91,9 @@ int main(int argc, char **argv)
 
 	qsrand(std::time(NULL));
 
-	QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
+#endif
 
 	//TODO: Fix the bug where the command help text is not translated
 	QxtCommandOptions options;
@@ -216,7 +218,7 @@ int main(int argc, char **argv)
 	if(app.sendMessage(fileInfo.filePath()))
 		return 0;
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 	notify_init("Actionaz");
 #endif
 
@@ -244,7 +246,7 @@ int main(int argc, char **argv)
 	qRegisterMetaTypeStreamOperators<ActionTools::ActionInstanceBuffer>("ActionInstanceBuffer");
 	qRegisterMetaTypeStreamOperators<Tools::Version>("Version");
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 	{
 #ifdef ACT_PROFILE
 		Tools::HighResolutionTimer timer("Load key codes");

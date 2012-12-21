@@ -53,7 +53,7 @@ SettingsDialog::SettingsDialog(QSystemTrayIcon *systemTrayIcon, QWidget *parent)
 {
 	ui->setupUi(this);
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 	ui->fileAssociationsLabel->setVisible(false);
 	ui->associateASCRCheckBox->setVisible(false);
 	ui->associateACODCheckBox->setVisible(false);

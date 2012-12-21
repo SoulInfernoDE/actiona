@@ -29,8 +29,9 @@
 #include <QMessageBox>
 #include <QMainWindow>
 
-#ifdef Q_WS_X11
-#include <QX11Info>
+#include "platforminfo.h"
+
+#ifdef Q_OS_UNIX
 #include <X11/Xlib.h>
 #endif
 
@@ -73,7 +74,7 @@ namespace ActionTools
 		,mRectanglePen(CreatePen(PS_SOLID, 3, RGB(255, 0, 0)))
 #endif
 	{
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 		foreach(QWidget *widget, QApplication::topLevelWidgets())
 		{
 			if(QMainWindow *mainWindow = qobject_cast<QMainWindow*>(widget))
@@ -131,7 +132,7 @@ namespace ActionTools
 				mWindowIgnoreList.append(widget);
 		}
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 		if(mMainWindow)
 			mMainWindow->showMinimized();
 #endif
@@ -254,9 +255,9 @@ namespace ActionTools
 #ifdef Q_WS_WIN
 		mPreviousCursor = SetCursor(newCursor.handle());
 #endif
-#ifdef Q_WS_X11
-		if(XGrabPointer(QX11Info::display(), DefaultRootWindow(QX11Info::display()), True, ButtonReleaseMask, GrabModeAsync, GrabModeAsync,
-			None, newCursor.handle(), CurrentTime) != GrabSuccess)
+#ifdef Q_OS_UNIX
+        if(XGrabPointer(PlatformInfo::display(), DefaultRootWindow(PlatformInfo::display()), True, ButtonReleaseMask, GrabModeAsync, GrabModeAsync,
+            None, PlatformInfo::cursorNativeHandle(newCursor), CurrentTime) != GrabSuccess)
 		{
 			QMessageBox::warning(this, tr("Choose a window"), tr("Unable to grab the pointer."));
 			mSearching = false;
@@ -282,8 +283,8 @@ namespace ActionTools
 		foreach(QWidget *widget, qApp->topLevelWidgets())
 			widget->setWindowOpacity(1.0f);
 	#endif
-	#ifdef Q_WS_X11
-		XUngrabPointer(QX11Info::display(), CurrentTime);
+	#ifdef Q_OS_UNIX
+        XUngrabPointer(PlatformInfo::display(), CurrentTime);
 
 		if(mMainWindow)
 			mMainWindow->showNormal();
@@ -294,10 +295,10 @@ namespace ActionTools
 		emit searchEnded(mLastFoundWindow);
 	}
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 	WId ChooseWindowPushButton::windowAtPointer() const
 	{
-		Window window = DefaultRootWindow(QX11Info::display());
+        Window window = DefaultRootWindow(PlatformInfo::display());
 		Window back = None;
 
 		while(window)
@@ -308,7 +309,7 @@ namespace ActionTools
 
 			back = window;
 
-			XQueryPointer(QX11Info::display(), window, &root, &child, &rx, &ry, &x, &y, &mask);
+            XQueryPointer(PlatformInfo::display(), window, &root, &child, &rx, &ry, &x, &y, &mask);
 
 			window = child;
 		}

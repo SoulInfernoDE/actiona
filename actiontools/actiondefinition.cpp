@@ -28,7 +28,7 @@
 #include <QSysInfo>
 #include <QApplication>
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 #include <X11/Xlib.h>
 #include <X11/extensions/XTest.h>
 #include "xdisplayhelper.h"
@@ -47,7 +47,7 @@ namespace ActionTools
 	if(!(flags() & WorksOnWindows))
 		return false;
 #endif
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 	if(!(flags() & WorksOnGnuLinux))
 		return false;
 #endif
@@ -96,7 +96,7 @@ namespace ActionTools
 
 	bool ActionDefinition::requirementCheckXTest(QStringList &missingRequirements) const
 	{
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 		int unused;
 		XDisplayHelper xDisplayHelper;
 		

@@ -25,13 +25,13 @@
 #include <QSharedPointer>
 #include <QPoint>
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
+#include "platforminfo.h"
 #include <QTimer>
 #include <X11/Xlib.h>
 #include <X11/Xlibint.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/record.h>
-#include <QX11Info>
 #endif
 
 #ifdef Q_WS_WIN
@@ -42,7 +42,7 @@ namespace ActionTools
 {
 	namespace SystemInput
 	{
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 		static XRecordContext gXRecordContext;
 
 		static void xRecordCallback(XPointer, XRecordInterceptData *data)
@@ -209,7 +209,7 @@ namespace ActionTools
 			: QObject(parent),
 			  mThread(new QThread(this))
 			, mStarted(false)
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 			, mProcessRepliesTimer(new QTimer(this))
 #endif
 		{
@@ -223,7 +223,7 @@ namespace ActionTools
 			mThread->start();
 #endif
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 			connect(mProcessRepliesTimer, SIGNAL(timeout()), this, SLOT(processReplies()));
 
 			start();
@@ -245,7 +245,7 @@ namespace ActionTools
 
 			mStarted = true;
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 			XRecordClientSpec clients = XRecordAllClients;
 			XRecordRange *range = XRecordAllocRange();
 
@@ -259,7 +259,7 @@ namespace ActionTools
 			range->device_events.first = KeyPress;
 			range->device_events.last = MotionNotify;
 
-			XRecordContext gXRecordContext = XRecordCreateContext(QX11Info::display(), 0, &clients, 1, &range, 1);
+            XRecordContext gXRecordContext = XRecordCreateContext(PlatformInfo::display(), 0, &clients, 1, &range, 1);
 
 			XFree(range);
 
@@ -270,7 +270,7 @@ namespace ActionTools
 				return;
 			}
 
-			XRecordEnableContextAsync(QX11Info::display(), gXRecordContext, &xRecordCallback, 0);
+            XRecordEnableContextAsync(PlatformInfo::display(), gXRecordContext, &xRecordCallback, 0);
 
 			mProcessRepliesTimer->setSingleShot(false);
 			mProcessRepliesTimer->start(0);
@@ -289,11 +289,11 @@ namespace ActionTools
 
 			mStarted = false;
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 			mProcessRepliesTimer->stop();
 
-			XRecordDisableContext(QX11Info::display(), gXRecordContext);
-			XRecordFreeContext(QX11Info::display(), gXRecordContext);
+            XRecordDisableContext(PlatformInfo::display(), gXRecordContext);
+            XRecordFreeContext(PlatformInfo::display(), gXRecordContext);
 #endif
 
 #ifdef Q_WS_WIN
@@ -302,7 +302,7 @@ namespace ActionTools
 #endif
 		}
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 		void Task::processReplies()
 		{
 			//XRecordProcessReplies(QX11Info::display());

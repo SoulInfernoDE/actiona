@@ -3,6 +3,9 @@ include(actions/actions.pri)
 include(code/code.pri)
 TARGET = ActionPackWindows
 QT += script
+greaterThan(QT_MAJOR_VERSION, 4) {
+    QT += widgets
+}
 HEADERS += actionpackwindows.h
 RESOURCES += actionpackwindows.qrc
 TRANSLATIONS = ../../locale/actionpackwindows_fr_FR.ts

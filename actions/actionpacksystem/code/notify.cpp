@@ -22,7 +22,7 @@
 
 #include <QScriptValueIterator>
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 #undef signals
 #include <libnotify/notify.h>
 #define signals
@@ -66,7 +66,7 @@ namespace Code
 	
 	Notify::~Notify()
 	{
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 		if(mNotification)
 		{
 			notify_notification_close(mNotification, 0);
@@ -77,7 +77,7 @@ namespace Code
 	
 	QScriptValue Notify::show()
 	{
-#ifdef Q_WS_X11
+#ifdef Q_OS_UNIX
 		QScriptValueIterator it(context()->argument(0));
 
 		while(it.hasNext())
