@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef TEXTINSTANCE_H
-#define TEXTINSTANCE_H
+#pragma once
 
 #include "actioninstance.h"
 #include "../keyboarddevice.h"
@@ -38,11 +37,11 @@ namespace Actions
 			FailedToSendInputException = ActionTools::ActionException::UserException
 		};
 	
-		TextInstance(const ActionTools::ActionDefinition *definition, QObject *parent = 0);
+		TextInstance(const ActionTools::ActionDefinition *definition, QObject *parent = nullptr);
 	
-		void startExecution();
-		void stopExecution();
-		void stopLongTermExecution();
+		void startExecution() override;
+		void stopExecution() override;
+		void stopLongTermExecution() override;
 
 	private slots:
 		void pressNextKey();
@@ -51,10 +50,10 @@ namespace Actions
 		KeyboardDevice mKeyboardDevice;
 		QTimer *mTimer;
 		QString mText;
-		int mCurrentCharacter;
+        int mCurrentCharacter;
+        bool mNoUnicodeCharacters;
 		
 		Q_DISABLE_COPY(TextInstance)
 	};
 }
 
-#endif // TEXTINSTANCE_H

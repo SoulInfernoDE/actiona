@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef IFACTIONVALUE_H
-#define IFACTIONVALUE_H
+#pragma once
 
 #include "actiontools_global.h"
 #include "subparameter.h"
@@ -43,10 +42,10 @@ namespace ActionTools
 		QString &action()												{ return mAction; }
 		SubParameter &actionParameter()									{ return mActionParameter; }
 		
-		static const char *WAIT;
-		static const char *GOTO;
-		static const char *RUNCODE;
-		static const char *CALLPROCEDURE;
+		static QLatin1String WAIT;
+		static QLatin1String GOTO;
+		static QLatin1String RUNCODE;
+		static QLatin1String CALLPROCEDURE;
 		
 	private:
 		QString mAction;
@@ -54,4 +53,3 @@ namespace ActionTools
 	};
 }
 
-#endif // IFACTIONVALUE_H

@@ -1,6 +1,6 @@
 /*
     Actiona
-    Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
     Actiona is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
     Contact : jmgr@jmgr.info
 */
 
-#ifndef VARIABLELINEEDIT_H
-#define VARIABLELINEEDIT_H
+#pragma once
 
 #include "codelineedit.h"
 
@@ -32,12 +31,11 @@ namespace ActionTools
     public:
         explicit VariableLineEdit(QWidget *parent);
 
-        QSet<QString> findVariables() const;
+        QSet<QString> findVariables() const override;
 
     protected:
-        virtual void insertVariable(const QString &variable);
-        virtual QMenu *createResourcesMenu(QMenu *parentMenu, bool ignoreMultiline = false);
+        void insertVariable(const QString &variable) override;
+        QMenu *createResourcesMenu(QMenu *parentMenu, bool ignoreMultiline = false) override;
     };
 }
 
-#endif // VARIABLELINEEDIT_H

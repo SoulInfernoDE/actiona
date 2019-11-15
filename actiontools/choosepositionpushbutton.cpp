@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -20,10 +20,6 @@
 
 #include "choosepositionpushbutton.h"
 
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-#include "nativeeventfilteringapplication.h"
-#endif
-
 #include <QStylePainter>
 #include <QStyleOptionButton>
 #include <QMouseEvent>
@@ -34,16 +30,11 @@
 #include <QDebug>
 #include <QApplication>
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 #include <QX11Info>
 #include <X11/Xlib.h>
-#endif
-
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-#ifdef Q_OS_LINUX
 #include <X11/cursorfont.h>
 #include <xcb/xcb.h>
-#endif
 #endif
 
 #ifdef Q_OS_WIN
@@ -54,22 +45,18 @@ namespace ActionTools
 {
 	ChoosePositionPushButton::ChoosePositionPushButton(QWidget *parent)
 	: QPushButton(parent),
-	mCrossIcon(new QPixmap(":/images/cross.png")),
-	mSearching(false),
-	mMainWindow(0)
-#ifdef Q_OS_LINUX
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    mCrossIcon(new QPixmap(QStringLiteral(":/images/cross.png")))
+#ifdef Q_OS_UNIX
     ,mCrossCursor(XCreateFontCursor(QX11Info::display(), XC_crosshair))
-#endif
 #endif
 #ifdef Q_OS_WIN
 	,mPreviousCursor(NULL)
 #endif
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
         for(QWidget *widget: QApplication::topLevelWidgets())
 		{
-			if(QMainWindow *mainWindow = qobject_cast<QMainWindow*>(widget))
+			if(auto mainWindow = qobject_cast<QMainWindow*>(widget))
 			{
 				mMainWindow = mainWindow;
 				break;
@@ -85,16 +72,9 @@ namespace ActionTools
 		if(mSearching)
 			stopMouseCapture();
 
-#ifdef Q_OS_LINUX
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#ifdef Q_OS_UNIX
         QCoreApplication::instance()->removeNativeEventFilter(this);
-#else
-        nativeEventFilteringApp->removeNativeEventFilter(this);
-#endif
-
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
         XFreeCursor(QX11Info::display(), mCrossCursor);
-#endif
 #endif
 
         delete mCrossIcon;
@@ -124,7 +104,7 @@ namespace ActionTools
 		mSearching = true;
 		update();
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
         mShownWindows.clear();
 
         for(QWidget *widget: qApp->topLevelWidgets())
@@ -153,34 +133,17 @@ namespace ActionTools
 		emit chooseStarted();
 
 #ifdef Q_OS_WIN
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
         mPreviousCursor = SetCursor(LoadCursor(0, IDC_CROSS));
-#else
-        mPreviousCursor = SetCursor(newCursor.handle());
 #endif
-#endif
-#ifdef Q_OS_LINUX
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#ifdef Q_OS_UNIX
         QCoreApplication::instance()->installNativeEventFilter(this);
-#else
-		nativeEventFilteringApp->installNativeEventFilter(this);
-#endif
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
         if(XGrabPointer(QX11Info::display(), DefaultRootWindow(QX11Info::display()), True, ButtonReleaseMask, GrabModeAsync, GrabModeAsync,
                         None, mCrossCursor, CurrentTime) != GrabSuccess)
         {
             QMessageBox::warning(this, tr("Choose a window"), tr("Unable to grab the pointer."));
             event->ignore();
         }
-#else
-        if(XGrabPointer(QX11Info::display(), DefaultRootWindow(QX11Info::display()), True, ButtonReleaseMask, GrabModeAsync, GrabModeAsync,
-                        None, newCursor.handle(), CurrentTime) != GrabSuccess)
-        {
-            QMessageBox::warning(this, tr("Choose a window"), tr("Unable to grab the pointer."));
-            event->ignore();
-        }
-#endif
 #endif
     }
 
@@ -195,13 +158,12 @@ namespace ActionTools
 	}
 #endif
 
-#ifdef Q_OS_LINUX
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#ifdef Q_OS_UNIX
     bool ChoosePositionPushButton::nativeEventFilter(const QByteArray &eventType, void *message, long *)
     {
         if(eventType == "xcb_generic_event_t")
         {
-            xcb_generic_event_t* event = static_cast<xcb_generic_event_t *>(message);
+            auto* event = static_cast<xcb_generic_event_t *>(message);
 
             switch(event->response_type)
             {
@@ -218,21 +180,6 @@ namespace ActionTools
 
         return false;
     }
-#else
-	bool ChoosePositionPushButton::x11EventFilter(XEvent *event)
-	{
-		if(event->type == ButtonRelease)
-		{
-			emit positionChosen(QCursor::pos());
-
-			stopMouseCapture();
-
-			return true;
-		}
-
-		return false;
-	}
-#endif
 #endif
 
 	void ChoosePositionPushButton::stopMouseCapture()
@@ -247,21 +194,15 @@ namespace ActionTools
         for(QWidget *widget: qApp->topLevelWidgets())
 			widget->setWindowOpacity(1.0f);
 #endif
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
         XUngrabPointer(QX11Info::display(), CurrentTime);
         XFlush(QX11Info::display());
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
         QCoreApplication::instance()->removeNativeEventFilter(this);
-#else
-		nativeEventFilteringApp->removeNativeEventFilter(this);
-#endif
 
-        for(int windowIndex = 0; windowIndex < mShownWindows.size(); ++windowIndex)
+        for(auto shownWindow: mShownWindows)
         {
-            QWidget *window = mShownWindows[windowIndex];
-
-            XMapWindow(QX11Info::display(), window->winId());
+            XMapWindow(QX11Info::display(), shownWindow->winId());
         }
 
         if(mMainWindow)

@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -26,13 +26,13 @@
 #include <QDebug>
 #include <QDir>
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
+#include <QX11Info>
 #include <X11/Xlib.h>
-#include <signal.h>
+#include <cerrno>
+#include <csignal>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <errno.h>
-#include <QX11Info>
 #endif
 
 #ifdef Q_OS_WIN
@@ -47,7 +47,7 @@ namespace ActionTools
 
 	void CrossPlatform::setForegroundWindow(QWidget *window)
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		XRaiseWindow(QX11Info::display(), window->winId());
 #endif
 #ifdef Q_OS_WIN
@@ -66,7 +66,7 @@ namespace ActionTools
 
 	bool CrossPlatform::killProcess(int id, KillMode killMode, int timeout)
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		switch(killMode)
 		{
 		case Graceful:
@@ -124,7 +124,7 @@ namespace ActionTools
 						timespec req;
 						req.tv_sec = 0;
 						req.tv_nsec = 10000; //10 msec
-						nanosleep(&req, 0);
+						nanosleep(&req, nullptr);
 
 						return (processStatus(id) == Stopped);
 					}
@@ -132,7 +132,7 @@ namespace ActionTools
 					timespec req;
 					req.tv_sec = 0;
 					req.tv_nsec = 100000; //100 msec
-					nanosleep(&req, 0);
+					nanosleep(&req, nullptr);
 				}
 			}
 		}
@@ -208,7 +208,7 @@ namespace ActionTools
 
 	CrossPlatform::ProcessStatus CrossPlatform::processStatus(int id)
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		return (kill(id, 0) == 0) ? Running : Stopped;
 #endif
 #ifdef Q_OS_WIN
@@ -225,8 +225,8 @@ namespace ActionTools
 
 	QList<int> CrossPlatform::runningProcesses()
 	{
-#ifdef Q_OS_LINUX
-		QDir procDir("/proc");
+#ifdef Q_OS_UNIX
+		QDir procDir(QStringLiteral("/proc"));
 		QList<int> back;
 
 		if(!procDir.exists())
@@ -278,7 +278,7 @@ namespace ActionTools
 
 	void CrossPlatform::sleep(int milliseconds)
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		struct timespec timeout0;
 		struct timespec timeout1;
 		struct timespec* tmp;
@@ -302,7 +302,7 @@ namespace ActionTools
 
 	void CrossPlatform::setupLastError()
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		mLastError = errno;
 
 		char *errorStr = strerror(errno);

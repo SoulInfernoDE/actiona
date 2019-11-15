@@ -1,6 +1,6 @@
 /*
 	Actiona
-    Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@
 #include <QMessageBox>
 #include <QMenu>
 
+#include <algorithm>
+
 namespace ActionTools
 {
     CodeEditorDialog::CodeEditorDialog(QAbstractItemModel *completionModel, QMenu *variablesMenu, QMenu *resourcesMenu, QWidget *parent)
@@ -41,15 +43,15 @@ namespace ActionTools
 
 		QSettings settings;
 
-		QAction *swapCodeAction = new QAction(this);
-		swapCodeAction->setShortcut(QKeySequence(settings.value("actions/switchTextCode", QKeySequence("Ctrl+Shift+C")).toString()));
+		auto swapCodeAction = new QAction(this);
+		swapCodeAction->setShortcut(QKeySequence(settings.value(QStringLiteral("actions/switchTextCode"), QKeySequence(QStringLiteral("Ctrl+Shift+C"))).toString()));
 		swapCodeAction->setShortcutContext(Qt::WindowShortcut);
 		addAction(swapCodeAction);
 
-		connect(swapCodeAction, SIGNAL(triggered()), this, SLOT(swapCode()));
-		connect(ui->editor, SIGNAL(acceptDialog()), this, SLOT(accept()));
-        if(mResourcesMenu)//TMP
-            connect(mResourcesMenu, SIGNAL(triggered(QAction*)), this, SLOT(insertVariable(QAction*)));
+        connect(swapCodeAction, &QAction::triggered, this, &CodeEditorDialog::swapCode);
+        connect(ui->editor, &ActionTools::CodeEdit::acceptDialog, this, &CodeEditorDialog::accept);
+        if(mResourcesMenu)
+            connect(mResourcesMenu, &QMenu::triggered, this, static_cast<void (CodeEditorDialog::*)(QAction *action)>(&CodeEditorDialog::insertVariable));
 	}
 
 	CodeEditorDialog::~CodeEditorDialog()
@@ -99,7 +101,7 @@ namespace ActionTools
 	void CodeEditorDialog::accept()
 	{
 		QSettings settings;
-		if(settings.value("actions/checkCodeSyntaxAutomatically", QVariant(true)).toBool() && !ui->editor->checkSyntax())
+		if(settings.value(QStringLiteral("actions/checkCodeSyntaxAutomatically"), QVariant(true)).toBool() && !ui->editor->checkSyntax())
 			showSyntaxCheckError();
 		else
 			QDialog::accept();
@@ -119,9 +121,9 @@ namespace ActionTools
             variables.insert(action->text());
 
         QStringList variableList = variables.toList();
-        qSort(variableList);
+        std::sort(variableList.begin(), variableList.end());
 
-        QMenu *variablesMenu = 0;
+        QMenu *variablesMenu = nullptr;
 
         if(variableList.isEmpty())
         {
@@ -131,14 +133,14 @@ namespace ActionTools
         else
         {
             variablesMenu = new QMenu(tr("Insert variable"));
-            connect(variablesMenu, SIGNAL(triggered(QAction*)), this, SLOT(insertVariable(QAction*)));
+            connect(variablesMenu, &QMenu::triggered, this, static_cast<void (CodeEditorDialog::*)(QAction *action)>(&CodeEditorDialog::insertVariable));
             for(const QString &variable: variableList)
                 variablesMenu->addAction(variable);
         }
 
-        variablesMenu->setIcon(QIcon(":/images/variable.png"));
+		variablesMenu->setIcon(QIcon(QStringLiteral(":/images/variable.png")));
 
-        QMenu *menu = new QMenu;
+        auto menu = new QMenu;
 
         menu->addMenu(variablesMenu);
         menu->addMenu(mResourcesMenu);
@@ -171,7 +173,7 @@ namespace ActionTools
         if(isCode())
             ui->editor->insertPlainText(variable);
         else
-            ui->editor->insertPlainText("$" + variable);
+			ui->editor->insertPlainText(QStringLiteral("$") + variable);
     }
 
 	void CodeEditorDialog::showSyntaxCheckError()

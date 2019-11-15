@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -39,24 +39,33 @@
 
 namespace Actions
 {
-	ActionTools::StringListPair MultiDataInputInstance::modes = qMakePair(
-			QStringList() << "comboBox" << "editableComboBox" << "list" << "checkbox" << "radioButton",
-			QStringList()
-			<< QT_TRANSLATE_NOOP("MultiDataInputInstance::modes", "ComboBox")
-			<< QT_TRANSLATE_NOOP("MultiDataInputInstance::modes", "Editable ComboBox")
-			<< QT_TRANSLATE_NOOP("MultiDataInputInstance::modes", "List")
-			<< QT_TRANSLATE_NOOP("MultiDataInputInstance::modes", "CheckBox")
-			<< QT_TRANSLATE_NOOP("MultiDataInputInstance::modes", "RadioButton"));
+    Tools::StringListPair MultiDataInputInstance::modes =
+    {
+        {
+            QStringLiteral("comboBox"),
+            QStringLiteral("editableComboBox"),
+            QStringLiteral("list"),
+            QStringLiteral("checkbox"),
+            QStringLiteral("radioButton")
+        },
+        {
+            QStringLiteral(QT_TRANSLATE_NOOP("MultiDataInputInstance::modes", "ComboBox")),
+            QStringLiteral(QT_TRANSLATE_NOOP("MultiDataInputInstance::modes", "Editable ComboBox")),
+            QStringLiteral(QT_TRANSLATE_NOOP("MultiDataInputInstance::modes", "List")),
+            QStringLiteral(QT_TRANSLATE_NOOP("MultiDataInputInstance::modes", "CheckBox")),
+            QStringLiteral(QT_TRANSLATE_NOOP("MultiDataInputInstance::modes", "RadioButton"))
+        }
+    };
 
 	MultiDataInputInstance::MultiDataInputInstance(const ActionTools::ActionDefinition *definition, QObject *parent)
 		: ActionTools::ActionInstance(definition, parent),
-		  mDialog(0),
+		  mDialog(nullptr),
 		  mMode(ComboBoxMode),
 		  mMinimumChoiceCount(1),
 		  mMaximumChoiceCount(1),
-		  mComboBox(0),
-		  mListWidget(0),
-		  mButtonGroup(0)
+		  mComboBox(nullptr),
+		  mListWidget(nullptr),
+		  mButtonGroup(nullptr)
 	{
 	}
 
@@ -64,14 +73,14 @@ namespace Actions
 	{
 		bool ok = true;
 
-		QString question = evaluateString(ok, "question");
-		mMode = evaluateListElement<Mode>(ok, modes, "mode");
-		mItems = evaluateItemList(ok, "items");
-		QString defaultValue = evaluateString(ok, "defaultValue");
-		mVariable = evaluateVariable(ok, "variable");
-		QString windowTitle = evaluateString(ok, "windowTitle");
-        QImage windowIcon = evaluateImage(ok, "windowIcon");
-		mMaximumChoiceCount = evaluateInteger(ok, "maximumChoiceCount");
+		QString question = evaluateString(ok, QStringLiteral("question"));
+		mMode = evaluateListElement<Mode>(ok, modes, QStringLiteral("mode"));
+		mItems = evaluateItemList(ok, QStringLiteral("items"));
+		QString defaultValue = evaluateString(ok, QStringLiteral("defaultValue"));
+		mVariable = evaluateVariable(ok, QStringLiteral("variable"));
+		QString windowTitle = evaluateString(ok, QStringLiteral("windowTitle"));
+		QImage windowIcon = evaluateImage(ok, QStringLiteral("windowIcon"));
+		mMaximumChoiceCount = evaluateInteger(ok, QStringLiteral("maximumChoiceCount"));
 
 		if(!ok)
 			return;
@@ -83,7 +92,7 @@ namespace Actions
 
         mDialog->setWindowFlags(mDialog->windowFlags() | Qt::WindowContextHelpButtonHint);
 
-		QVBoxLayout *layout = new QVBoxLayout(mDialog);
+		auto layout = new QVBoxLayout(mDialog);
 
 		mDialog->setLayout(layout);
 		mDialog->setWindowTitle(windowTitle);
@@ -131,7 +140,7 @@ namespace Actions
 				layout->addWidget(mListWidget);
 
 				if(mMaximumChoiceCount > 1)
-					connect(mListWidget, SIGNAL(itemSelectionChanged()), this, SLOT(listItemSelectionChanged()));
+                    connect(mListWidget, &QListWidget::itemSelectionChanged, this, &MultiDataInputInstance::listItemSelectionChanged);
 			}
 			break;
 		case CheckboxMode:
@@ -142,13 +151,16 @@ namespace Actions
 			break;
 		}
 
+        if(mMode != ListMode)
+            layout->addStretch(1);
+
 		QDialogButtonBox *dialogButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, mDialog);
 		layout->addWidget(dialogButtonBox);
 
-		connect(dialogButtonBox, SIGNAL(accepted()), mDialog, SLOT(accept()));
-		connect(dialogButtonBox, SIGNAL(rejected()), mDialog, SLOT(reject()));
-		connect(mDialog, SIGNAL(accepted()), this, SLOT(accepted()));
-		connect(mDialog, SIGNAL(rejected()), this, SLOT(rejected()));
+        connect(dialogButtonBox, &QDialogButtonBox::accepted, mDialog, &QDialog::accept);
+        connect(dialogButtonBox, &QDialogButtonBox::rejected, mDialog, &QDialog::reject);
+        connect(mDialog, &QDialog::accepted, this, &MultiDataInputInstance::accepted);
+        connect(mDialog, &QDialog::rejected, this, &MultiDataInputInstance::rejected);
 
         for(QLabel *label: mDialog->findChildren<QLabel*>())
             label->setOpenExternalLinks(true);
@@ -221,14 +233,14 @@ namespace Actions
 
 		closeDialog();
 
-		emit executionEnded();
+		executionEnded();
 	}
 
 	void MultiDataInputInstance::rejected()
 	{
 		closeDialog();
 
-		emit executionEnded();
+		executionEnded();
 	}
 
 	void MultiDataInputInstance::listItemSelectionChanged()
@@ -264,10 +276,10 @@ namespace Actions
 		mButtonGroup->setExclusive(exclusive);
 
 		if(!exclusive && mMaximumChoiceCount > 1)
-			connect(mButtonGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(checkboxChecked(QAbstractButton*)));
+            connect(mButtonGroup, static_cast<void (QButtonGroup::*)(QAbstractButton *)>(&QButtonGroup::buttonClicked), this, &MultiDataInputInstance::checkboxChecked);
 
 		int itemCount = mItems.size();
-		QGridLayout *gridLayout = new QGridLayout;
+		auto gridLayout = new QGridLayout;
 
 		for(int i = 0, row = 0, col = 0; i < itemCount; ++i)
 		{
@@ -306,7 +318,7 @@ namespace Actions
 		if(mDialog)
 		{
 			mDialog->close();
-			mDialog = 0;
+			mDialog = nullptr;
 		}
 	}
 }

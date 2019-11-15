@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ namespace ActionTools
 	{
 		if(event->matches(QKeySequence::Copy))
 		{
-			QStandardItemModel *standardItemModel = qobject_cast<QStandardItemModel *>(model());
+			auto standardItemModel = qobject_cast<QStandardItemModel *>(model());
 			if(standardItemModel)
 			{
 				QStandardItem *item = standardItemModel->item(currentIndex().row(), 0);

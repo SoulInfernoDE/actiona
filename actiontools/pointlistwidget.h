@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef POINTLISTWIDGET_H
-#define POINTLISTWIDGET_H
+#pragma once
 
 #include "actiontools_global.h"
 
@@ -38,8 +37,8 @@ namespace ActionTools
 		Q_OBJECT
 
 	public:
-		explicit PointListWidget(QWidget *parent = 0);
-		~PointListWidget();
+		explicit PointListWidget(QWidget *parent = nullptr);
+		~PointListWidget() override;
 
 		QPolygon points() const;
 		void setPoints(const QPolygon &points);
@@ -68,4 +67,3 @@ namespace ActionTools
 	};
 }
 
-#endif // POINTLISTWIDGET_H

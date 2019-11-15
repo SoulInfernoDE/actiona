@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -22,10 +22,17 @@
 
 namespace Actions
 {
-	ActionTools::StringListPair KillProcessInstance::killModes = qMakePair(
-			QStringList() << "graceful" << "forceful" << "gracefulThenForceful",
-			QStringList()
-			<< QT_TRANSLATE_NOOP("KillProcessInstance::killModes", "Graceful")
-			<< QT_TRANSLATE_NOOP("KillProcessInstance::killModes", "Forceful")
-			<< QT_TRANSLATE_NOOP("KillProcessInstance::killModes", "Graceful then forceful"));
+    Tools::StringListPair KillProcessInstance::killModes =
+    {
+        {
+            QStringLiteral("graceful"),
+            QStringLiteral("forceful"),
+            QStringLiteral("gracefulThenForceful")
+        },
+        {
+            QStringLiteral(QT_TRANSLATE_NOOP("KillProcessInstance::killModes", "Graceful")),
+            QStringLiteral(QT_TRANSLATE_NOOP("KillProcessInstance::killModes", "Forceful")),
+            QStringLiteral(QT_TRANSLATE_NOOP("KillProcessInstance::killModes", "Graceful then forceful"))
+        }
+    };
 }

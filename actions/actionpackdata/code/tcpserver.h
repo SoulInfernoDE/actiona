@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef TCPSERVER_H
-#define TCPSERVER_H
+#pragma once
 
 #include "code/codeclass.h"
 
@@ -39,15 +38,15 @@ namespace Code
 		static QScriptValue constructor(QScriptContext *context, QScriptEngine *engine);
 		
 		TcpServer();
-		~TcpServer();
+		~TcpServer() override;
 		
 		void setOnNewConnection(const QScriptValue &onNewConnection)		{ mOnNewConnection = onNewConnection; }
 		
 		QScriptValue onNewConnection() const								{ return mOnNewConnection; }
 		
 	public slots:
-        QString toString() const                                            { return "TcpServer"; }
-        virtual bool equals(const QScriptValue &other) const                { return defaultEqualsImplementation<TcpServer>(other); }
+		QString toString() const override                                            { return QStringLiteral("TcpServer"); }
+        bool equals(const QScriptValue &other) const override                { return defaultEqualsImplementation<TcpServer>(other); }
 		QScriptValue listen(const QString &address = QString(), int port = 0);
 		QScriptValue waitForNewConnection(int waitTime = 30000);
 		QScriptValue nextPendingConnection();
@@ -63,4 +62,3 @@ namespace Code
 	};
 }
 
-#endif // TCPSERVER_H

@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef NOTIFYINSTANCE_H
-#define NOTIFYINSTANCE_H
+#pragma once
 
 #include "actioninstance.h"
 #include "script.h"
@@ -38,10 +37,10 @@ namespace Actions
 			UnableToShowNotificationException = ActionTools::ActionException::UserException
 		};
 
-		NotifyInstance(const ActionTools::ActionDefinition *definition, QObject *parent = 0);
-		~NotifyInstance();
+		NotifyInstance(const ActionTools::ActionDefinition *definition, QObject *parent = nullptr);
+		~NotifyInstance() override;
 
-		void startExecution();
+		void startExecution() override;
 
 	private:
 		_NotifyNotification *mNotification;
@@ -50,4 +49,3 @@ namespace Actions
 	};
 }
 
-#endif // NOTIFYINSTANCE_H

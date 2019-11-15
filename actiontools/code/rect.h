@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef RECT_H
-#define RECT_H
+#pragma once
 
 #include "actiontools_global.h"
 #include "code/codeclass.h"
@@ -75,8 +74,8 @@ namespace Code
 		
 	public slots:
 		QScriptValue clone() const;
-		bool equals(const QScriptValue &other) const;
-		QString toString() const;
+		bool equals(const QScriptValue &other) const override;
+		QString toString() const override;
 		QScriptValue normalize();
 		QScriptValue setTop(int top);
 		QScriptValue setBottom(int bottom);
@@ -103,4 +102,3 @@ namespace Code
 	};
 }
 
-#endif // RECT_H

@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ namespace ActionTools
 	PositionEdit::PositionEdit(QWidget *parent)
 		: QWidget(parent),
         ui(new Ui::PositionEdit),
-        mValidator(new QRegExpValidator(QRegExp("^\\d+(\\.\\d{1,2})?:\\d+(\\.\\d{1,2})?$", Qt::CaseSensitive, QRegExp::RegExp2), this))
+		mValidator(new QRegExpValidator(QRegExp(QStringLiteral("^\\d+(\\.\\d{1,2})?:\\d+(\\.\\d{1,2})?$"), Qt::CaseSensitive, QRegExp::RegExp2), this))
 	{
 		ui->setupUi(this);
 
@@ -92,7 +92,7 @@ namespace ActionTools
 
     void PositionEdit::setPosition(QPointF position)
 	{
-		ui->position->setText(QString("%1:%2").arg(position.x()).arg(position.y()));
+		ui->position->setText(QStringLiteral("%1:%2").arg(position.x()).arg(position.y()));
 	}
 
     void PositionEdit::on_choose_positionChosen(QPointF position)
@@ -107,7 +107,7 @@ namespace ActionTools
 		if(code)
 		{
 			QString oldText = ui->position->text();
-            ui->position->setValidator(0);
+            ui->position->setValidator(nullptr);
 			ui->position->setText(oldText);
 		}
         else

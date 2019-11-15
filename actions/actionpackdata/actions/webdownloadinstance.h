@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef WEBDOWNLOADINSTANCE_H
-#define WEBDOWNLOADINSTANCE_H
+#pragma once
 
 #include "actioninstance.h"
 #include "script.h"
@@ -50,13 +49,13 @@ namespace Actions
 			DownloadException
 		};
 
-		WebDownloadInstance(const ActionTools::ActionDefinition *definition, QObject *parent = 0);
-		~WebDownloadInstance();
+		WebDownloadInstance(const ActionTools::ActionDefinition *definition, QObject *parent = nullptr);
+		~WebDownloadInstance() override;
 
-		static ActionTools::StringListPair destinations;
+        static Tools::StringListPair destinations;
 
-		void startExecution();
-		void stopExecution();
+		void startExecution() override;
+		void stopExecution() override;
 
 	private slots:
 		void finished();
@@ -76,4 +75,3 @@ namespace Actions
 	};
 }
 
-#endif // WEBDOWNLOADINSTANCE_H

@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #include "keyinput.h"
 #include "crossplatform.h"
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 #include "keysymhelper.h"
 #include <X11/Xlib.h>
 #include <X11/extensions/XTest.h>
@@ -37,13 +37,32 @@
 #endif
 
 #ifdef Q_OS_WIN
+#include <unordered_set>
 #include <Windows.h>
+
+// https://msdn.microsoft.com/en-us/library/windows/desktop/ms646267(v=vs.85).aspx
+static const std::unordered_set<int> extendedKeys =
+{{
+    VK_RMENU, // Alt
+    VK_RCONTROL,
+    VK_INSERT,
+    VK_DELETE,
+    VK_HOME,
+    VK_END,
+    VK_PRIOR, // Page Up
+    VK_NEXT, // Page Down
+    VK_UP,
+    VK_DOWN,
+    VK_LEFT,
+    VK_RIGHT,
+    VK_NUMLOCK,
+    VK_PRINT
+}};
 #endif
 
-KeyboardDevice::KeyboardDevice()
-	: mType(Win32)
-{
-}
+#include <array>
+
+KeyboardDevice::KeyboardDevice() = default;
 
 KeyboardDevice::~KeyboardDevice()
 {
@@ -53,9 +72,9 @@ KeyboardDevice::~KeyboardDevice()
 void KeyboardDevice::reset()
 {
     for(int nativeKey: mPressedKeys)
-	{
-		doKeyAction(Release, nativeKey);
-	}
+        doKeyAction(Release, nativeKey, false);
+
+    mPressedKeys.clear();
 }
 
 bool KeyboardDevice::pressKey(const QString &key)
@@ -73,7 +92,7 @@ bool KeyboardDevice::triggerKey(const QString &key)
 	return doKeyAction(Trigger, stringToNativeKey(key));
 }
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 static KeyCode keyToKeycode(const char *key)
 {
 	KeySym keySym = XStringToKeysym(key);
@@ -121,9 +140,9 @@ static bool sendKey(const char *key)
 }
 #endif
 
-bool KeyboardDevice::writeText(const QString &text, int delay) const
+bool KeyboardDevice::writeText(const QString &text, int delay, bool noUnicodeCharacters) const
 {
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 	bool result = true;
 	KeySym keySym[2];
 	std::wstring wideString = text.toStdWString();
@@ -177,24 +196,84 @@ bool KeyboardDevice::writeText(const QString &text, int delay) const
 #endif
 	
 #ifdef Q_OS_WIN
-	INPUT input[2];
-	std::wstring wideString = text.toStdWString();
+    std::array<INPUT, 2> input;
+    SecureZeroMemory(input.data(), input.size() * sizeof(INPUT));
 	bool result = true;
 
 	for(int i = 0; i < 2; ++i)
 	{
 		input[i].type = INPUT_KEYBOARD;
 		input[i].ki.wVk = 0;
-		input[i].ki.dwFlags = KEYEVENTF_UNICODE | (i == 0 ? 0 : KEYEVENTF_KEYUP);
+        if(noUnicodeCharacters)
+            input[i].ki.dwFlags = KEYEVENTF_SCANCODE | (i == 0 ? 0 : KEYEVENTF_KEYUP);
+        else
+            input[i].ki.dwFlags = KEYEVENTF_UNICODE | (i == 0 ? 0 : KEYEVENTF_KEYUP);
 		input[i].ki.time = 0;
-		input[i].ki.dwExtraInfo = 0;
-	}
+        input[i].ki.dwExtraInfo = 0;
+    }
+
+    HKL keyboardLayout = GetKeyboardLayout(0);
+
+    auto sendModifiersFunction = [&keyboardLayout](int key, int additionalFlags)
+    {
+        INPUT modifierInput;
+        SecureZeroMemory(&modifierInput, sizeof(INPUT));
+
+        modifierInput.type = INPUT_KEYBOARD;
+        modifierInput.ki.dwFlags = KEYEVENTF_SCANCODE | additionalFlags;
+        modifierInput.ki.wScan = MapVirtualKeyEx(key, MAPVK_VK_TO_VSC, keyboardLayout);
+
+        if(extendedKeys.count(key) > 0)
+            modifierInput.ki.dwFlags |= KEYEVENTF_EXTENDEDKEY;
+
+        SendInput(1, &modifierInput, sizeof(INPUT));
+    };
 
 	for(int i = 0; i < text.length(); ++i)
 	{
-		input[0].ki.wScan = input[1].ki.wScan = wideString[i];
+        SHORT virtualKey = 0;
 
-		result &= (SendInput(2, input, sizeof(INPUT)) != 0);
+        if(noUnicodeCharacters)
+        {
+            virtualKey = VkKeyScanEx(text[i].unicode(), keyboardLayout);
+            auto scanCode = MapVirtualKeyEx(LOBYTE(virtualKey), MAPVK_VK_TO_VSC, keyboardLayout);
+
+            if(extendedKeys.count(virtualKey) > 0)
+            {
+                input[0].ki.dwFlags |= KEYEVENTF_EXTENDEDKEY;
+                input[1].ki.dwFlags |= KEYEVENTF_EXTENDEDKEY;
+            }
+
+            if(HIBYTE(virtualKey) & 1) //Shift
+                sendModifiersFunction(VK_LSHIFT, 0);
+
+            if(HIBYTE(virtualKey) & 2) //Control
+                sendModifiersFunction(VK_LCONTROL, 0);
+
+            if(HIBYTE(virtualKey) & 4) //Alt
+                sendModifiersFunction(VK_LMENU, 0);
+
+            input[0].ki.wVk = input[1].ki.wVk = virtualKey;
+            input[0].ki.wScan = input[1].ki.wScan = scanCode;
+        }
+        else
+        {
+            input[0].ki.wScan = input[1].ki.wScan = text[i].unicode();
+        }
+
+        result &= (SendInput(2, input.data(), sizeof(INPUT)) != 0);
+
+        if(noUnicodeCharacters)
+        {
+            if(HIBYTE(virtualKey) & 4) //Alt
+                sendModifiersFunction(VK_LMENU, KEYEVENTF_KEYUP);
+
+            if(HIBYTE(virtualKey) & 2) //Control
+                sendModifiersFunction(VK_LCONTROL, KEYEVENTF_KEYUP);
+
+            if(HIBYTE(virtualKey) & 1) //Shift
+                sendModifiersFunction(VK_LSHIFT, KEYEVENTF_KEYUP);
+        }
 
 		if(delay > 0)
 			ActionTools::CrossPlatform::sleep(delay);
@@ -204,12 +283,12 @@ bool KeyboardDevice::writeText(const QString &text, int delay) const
 #endif
 }
 
-bool KeyboardDevice::doKeyAction(Action action, int nativeKey)
+bool KeyboardDevice::doKeyAction(Action action, int nativeKey, bool alterPressedKeys)
 {
 	bool result = true;
 	
-#ifdef Q_OS_LINUX
-	KeyCode keyCode = XKeysymToKeycode(QX11Info::display(), nativeKey);
+#ifdef Q_OS_UNIX
+    KeyCode keyCode = XKeysymToKeycode(QX11Info::display(), nativeKey);
 	
 	if(action == Press || action == Trigger)
 		result &= XTestFakeKeyEvent(QX11Info::display(), keyCode, True, CurrentTime);
@@ -221,16 +300,21 @@ bool KeyboardDevice::doKeyAction(Action action, int nativeKey)
 	
 #ifdef Q_OS_WIN
 	INPUT input;
+    SecureZeroMemory(&input, sizeof(INPUT));
 	input.type = INPUT_KEYBOARD;
-	input.ki.time = 0;
-	input.ki.dwExtraInfo = 0;
-	input.ki.dwFlags = 0;
 
 	switch(mType)
 	{
 	case Win32:
-		input.ki.wVk = nativeKey;
-		input.ki.wScan = 0;
+    {
+        input.ki.wVk = nativeKey;
+
+        HKL keyboardLayout = GetKeyboardLayout(0);
+        input.ki.wScan = MapVirtualKeyEx(nativeKey, MAPVK_VK_TO_VSC, keyboardLayout);
+
+        if(extendedKeys.count(nativeKey) > 0)
+            input.ki.dwFlags |= KEYEVENTF_EXTENDEDKEY;
+    }
 		break;
 	case DirectX:
 		input.ki.wVk = 0;
@@ -239,26 +323,29 @@ bool KeyboardDevice::doKeyAction(Action action, int nativeKey)
 	}
 
 	if(action == Press || action == Trigger)
-		result &= (SendInput(1, &input, sizeof(INPUT)) != 0);
+        result &= (SendInput(1, &input, sizeof(INPUT)) != 0);
 	if(action == Release || action == Trigger)
 	{
 		input.ki.dwFlags |= KEYEVENTF_KEYUP;
 
-		result &= (SendInput(1, &input, sizeof(INPUT)) != 0);
+        result &= (SendInput(1, &input, sizeof(INPUT)) != 0);
 	}
 #endif
 	
-	if(action == Press)
-		mPressedKeys.insert(nativeKey);
-	else if(action == Release)
-		mPressedKeys.remove(nativeKey);
+    if(alterPressedKeys)
+    {
+        if(action == Press)
+            mPressedKeys.insert(nativeKey);
+        else if(action == Release)
+            mPressedKeys.remove(nativeKey);
+    }
 
-	return result;
+    return result;
 }
 
 int KeyboardDevice::stringToNativeKey(const QString &key) const
 {
-	ActionTools::KeyInput keyInput;
+    ActionTools::KeyInput keyInput;
 	keyInput.fromPortableText(key);
 	
 	if(keyInput.isQtKey())

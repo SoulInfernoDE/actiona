@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef SYSTEMINPUTTASK_H
-#define SYSTEMINPUTTASK_H
+#pragma once
 
 #include <QObject>
 
@@ -28,7 +27,7 @@
 
 class QThread;
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 class QTimer;
 #endif
 
@@ -41,8 +40,8 @@ namespace ActionTools
 			Q_OBJECT
 
 		public:
-			explicit Task(QObject *parent = 0);
-			~Task();
+			explicit Task(QObject *parent = nullptr);
+            ~Task() override;
 
 			static Task *instance()													{ return mInstance; }
 
@@ -64,7 +63,7 @@ namespace ActionTools
 			void stop();
 
 		private slots:
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 			void processReplies();
 #endif
 
@@ -72,12 +71,11 @@ namespace ActionTools
 			static Task *mInstance;
 
 			QThread *mThread;
-			bool mStarted;
-#ifdef Q_OS_LINUX
+			bool mStarted{false};
+#ifdef Q_OS_UNIX
 			QTimer *mProcessRepliesTimer;
 #endif
 		};
 	}
 }
 
-#endif // SYSTEMINPUTTASK_H

@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -34,9 +34,6 @@ namespace ActionTools
 
 		if(!(index.model()->flags(index) & Qt::ItemIsEnabled))
 		{
-			QFont fontBold;
-			fontBold.setBold(true);
-			painter->setFont(fontBold);
 			painter->fillRect(option.rect, option.palette.brush(QPalette::Inactive, QPalette::Highlight));
 			painter->drawText(option.rect, Qt::AlignLeft | Qt::TextSingleLine, valueString);
 		}
@@ -52,7 +49,7 @@ namespace ActionTools
 			return flags;
 
 		QString value =	index.data(Qt::UserRole).toString();
-		if(value == "header")
+		if(value == QLatin1String("header"))
 		{
 			flags &= ~Qt::ItemIsSelectable;
 			flags &= ~Qt::ItemIsEnabled;
@@ -64,6 +61,7 @@ namespace ActionTools
     CodeComboBox::CodeComboBox(QWidget *parent) :
 		QComboBox(parent)
 	{
+        delete model();
 		setModel(new CodeComboBoxModel(this));
 		setItemDelegate(new CodeComboBoxDelegate(this));
 
@@ -74,7 +72,7 @@ namespace ActionTools
 		setEditable(true);
 		setInsertPolicy(QComboBox::NoInsert);
 
-		connect(codeLineEdit, SIGNAL(codeChanged(bool)), this, SIGNAL(codeChanged(bool)));
+        connect(codeLineEdit, &CodeLineEdit::codeChanged, this, &CodeComboBox::codeChanged);
 
 		addActions(codeLineEdit->actions());
 		

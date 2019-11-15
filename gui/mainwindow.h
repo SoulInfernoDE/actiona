@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,17 +18,19 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include "script.h"
 #include "executer.h"
+#include "heatmapmode.h"
 
 #include <QMainWindow>
 #ifndef ACT_NO_UPDATER
 #include <QCryptographicHash>
 #include <QFile>
 #endif
+
+#include <memory>
 
 namespace Ui
 {
@@ -39,6 +41,7 @@ namespace ActionTools
 {
 	class ActionFactory;
 	class ActionInstance;
+    class ActionDefinition;
 }
 
 namespace Tools
@@ -52,19 +55,23 @@ class ScriptModel;
 class ProgressSplashScreen;
 class QTreeWidget;
 class QTreeWidgetItem;
-class NewActionTreeWidget;
+class NewActionModel;
 class QNetworkReply;
 class QFile;
 class QProgressDialog;
 class QUndoGroup;
 class QStandardItemModel;
-class QxtCommandOptions;
+class QCommandLineParser;
 class QNetworkAccessManager;
 class ActionDialog;
 class QModelIndex;
+class NewActionProxyModel;
+class ScriptProxyModel;
+class QHotkey;
 
 #ifdef Q_OS_WIN
-#include <Shobjidl.h>
+class QWinTaskbarButton;
+class QWinTaskbarProgress;
 #endif
 
 #include <QNetworkReply>
@@ -74,16 +81,17 @@ class MainWindow : public QMainWindow
 {
 	Q_OBJECT
 public:
-	MainWindow(QxtCommandOptions *commandOptions, ProgressSplashScreen *splashScreen, const QString &startScript, const QString &usedLocale);
-	~MainWindow();
+	MainWindow(QCommandLineParser &commandLineParser, ProgressSplashScreen *splashScreen, const QString &startScript, const QString &usedLocale);
+	~MainWindow() override;
 
 signals:
 	void needToShow();
 
+public slots:
+    void otherInstanceMessage(const QString &message);
+
 private slots:
 	void postInit();
-	void opacityOpenUpdate();
-	void opacityCloseUpdate();
 	void on_actionSave_triggered();
 	void on_actionSave_as_triggered();
 	void on_actionSave_copy_as_triggered();
@@ -128,7 +136,9 @@ private slots:
 	void on_scriptView_customContextMenuRequested(const QPoint &pos);
 	void on_actionHelp_triggered();
     void on_actionTake_screenshot_triggered();
-	void on_reportBugPushButton_clicked();
+    void on_actionsfilterLineEdit_textChanged(const QString &text);
+    void on_scriptFilterLineEdit_textChanged(const QString &text);
+    void on_scriptFilterCriteriaFlagsComboBox_flagsChanged(unsigned int flags);
 	void systemTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
 	void scriptEdited();
 	void actionSelectionChanged();
@@ -139,7 +149,7 @@ private slots:
 	void scriptContentDropped(const QString &scriptContent);
 	void addAction();
 	void openRecentFile();
-	void newActionDoubleClicked(QTreeWidgetItem *item, int column);
+    void newActionDoubleClicked(const QModelIndex &index);
 	void actionEnabled();
 	void packLoadError(const QString &error);
 	void stopExecution();
@@ -149,8 +159,6 @@ private slots:
 	void postExecution();
 	void logItemDoubleClicked(int itemRow);
 	void logItemClicked(int itemRow);
-    void otherInstanceMessage(const QString &message);
-    void scriptProcessing(int progress, int total, const QString &description);
 #ifndef ACT_NO_UPDATER
 	void updateError(const QString &message);
 	void updateNoResult();
@@ -169,20 +177,14 @@ private slots:
 	void postDownloadOperation();
 #endif
 
-private:
-	enum TaskbarStatus
-	{
-		NoProgress =		0 << 0,
-		Indeterminate =		1 << 0,
-		Normal =			1 << 1,
-		Error =				1 << 2,
-		Paused =			1 << 3
-	};
+protected:
+    void showEvent(QShowEvent *event) override;
 
+private:
 	void logItemClicked(int itemRow, bool doubleClick);
 	void updateUndoRedoStatus();
 	void execute(bool onlySelection);
-	void fillNewActionTreeWidget(NewActionTreeWidget *widget);
+    void fillNewActionModel();
     ActionDialog *actionDialog(ActionTools::ActionInstance *actionInstance);
 	bool editAction(ActionTools::ActionInstance *actionInstance, const QString &field = QString(), const QString &subField = QString(), int line = -1, int column = -1);
 	bool editAction(ActionTools::ActionInstance *actionInstance, int exception);
@@ -192,7 +194,7 @@ private:
 	bool loadFile(const QString &fileName, bool verbose = true);
 	bool saveFile(const QString &fileName, bool copy = false);
 	void setCurrentFile(const QString &fileName);
-	void closeEvent(QCloseEvent *event);
+	void closeEvent(QCloseEvent *event) override;
 	bool maybeSave();
 	bool save();
 	bool saveAs();
@@ -207,16 +209,16 @@ private:
 	void updateProxySettings();
 	bool checkReadResult(ActionTools::Script::ReadResult result);
 	void setTaskbarProgress(int value, int max);
-	void setTaskbarStatus(TaskbarStatus status);
+    void enableTaskbarProgress(bool enable);
     ActionTools::Script::ReadResult readScript(QIODevice *device);
     bool writeScript(QIODevice *device);
+    std::unique_ptr<QProgressDialog> createStandardProgressDialog();
+    ActionDialog *getOrCreateActionDialog(const ActionTools::ActionDefinition *actionDefinition);
 #ifndef ACT_NO_UPDATER
 	void checkForUpdate(bool silent);
 #endif
 
 	Ui::MainWindow *ui;
-	float mOpacity;
-	QTimer *mOpacityTimer;
 	bool mScriptModified;
 	QString mCurrentFile;
 	int mMaxRecentFiles;
@@ -235,13 +237,18 @@ private:
 	QPoint mPreviousWindowPosition;
 	QStandardItemModel *mCompletionModel;
 	QString mStartScript;
-	QxtCommandOptions *mCommandOptions;
+	QCommandLineParser &mCommandLineParser;
 	int mAddActionRow;
 	QString mAddAction;
 	QAction *mStopExecutionAction;
-	QList<ActionDialog *> mActionDialogs;
-	QString mUsedLocale;
-    QProgressDialog *mScriptProgressDialog;
+    QMap<int, ActionDialog *> mActionDialogs;
+    QString mUsedLocale;
+    NewActionProxyModel *mNewActionProxyModel;
+    ScriptProxyModel *mScriptProxyModel;
+    NewActionModel *mNewActionModel;
+    HeatmapMode mHeatmapMode;
+    QHotkey *mStartStopExecutionHotkey;
+    QHotkey *mPauseExecutionHotkey;
 #ifndef ACT_NO_UPDATER
 	QNetworkAccessManager *mNetworkAccessManager;
 	QNetworkReply *mUpdateDownloadNetworkReply;
@@ -255,10 +262,10 @@ private:
 	QCryptographicHash mHashCalculator;
 #endif
 #ifdef Q_OS_WIN
-	ITaskbarList3 *mTaskbarList;
+    QWinTaskbarButton *mTaskbarButton;
+    QWinTaskbarProgress* mTaskbarProgress;
 #endif
 
 	Q_DISABLE_COPY(MainWindow)
 };
 
-#endif // MAINWINDOW_H

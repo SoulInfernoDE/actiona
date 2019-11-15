@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef READINIFILEINSTANCE_H
-#define READINIFILEINSTANCE_H
+#pragma once
 
 #include "actioninstance.h"
 
@@ -42,16 +41,15 @@ namespace Actions
             UnableToFindSectionException
 		};
 
-		ReadIniFileInstance(const ActionTools::ActionDefinition *definition, QObject *parent = 0)
+		ReadIniFileInstance(const ActionTools::ActionDefinition *definition, QObject *parent = nullptr)
 			: ActionTools::ActionInstance(definition, parent)											{}
 
-		static ActionTools::StringListPair modes;
+        static Tools::StringListPair modes;
 
-		void startExecution();
+		void startExecution() override;
 
 	private:
 		Q_DISABLE_COPY(ReadIniFileInstance)
 	};
 }
 
-#endif // READINIFILEINSTANCE_H

@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #include "windowhandle.h"
 #include "crossplatform.h"
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 #include <QX11Info>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -32,21 +32,95 @@
 #include <Windows.h>
 #endif
 
+#include <memory>
+
 namespace ActionTools
 {
 	static QList<WindowHandle> gWindowList;
 
+#ifdef Q_OS_UNIX
+    // from wmctrl 1.07 (http://tomas.styblo.name/wmctrl/) by Tomas Styblo + UBUNTU PATCH for 64bit
+    // from giuspen-x-osk by Giuseppe Penone
+    #define MAX_PROPERTY_VALUE_LEN 4096
+
+    QString get_property(Display *disp, Window win, Atom xa_prop_type, const char *prop_name)
+    {
+        Atom           xa_prop_name;
+        Atom           xa_ret_type;
+        int            ret_format;
+        unsigned long  ret_nitems;
+        unsigned long  ret_bytes_after;
+        unsigned long  tmp_size;
+
+        xa_prop_name = XInternAtom(disp, prop_name, False);
+
+        /* MAX_PROPERTY_VALUE_LEN / 4 explanation (XGetWindowProperty manpage):
+         *
+         * long_length = Specifies the length in 32-bit multiples of the
+         *               data to be retrieved.
+         *
+         * NOTE:  see
+         * http://mail.gnome.org/archives/wm-spec-list/2003-March/msg00067.html
+         * In particular:
+         *
+         * 	When the X window system was ported to 64-bit architectures, a
+         * rather peculiar design decision was made. 32-bit quantities such
+         * as Window IDs, atoms, etc, were kept as longs in the client side
+         * APIs, even when long was changed to 64 bits.
+         *
+         */
+        unsigned char *property{nullptr};
+
+        if(XGetWindowProperty(disp, win, xa_prop_name, 0, MAX_PROPERTY_VALUE_LEN / 4, False,
+                              xa_prop_type, &xa_ret_type, &ret_format,
+                              &ret_nitems, &ret_bytes_after, &property) != Success)
+        {
+            XFree(property);
+
+            qDebug("Cannot get %s property.\n", prop_name);
+
+            return {};
+        }
+
+        auto ret_prop = std::unique_ptr<unsigned char, void(*)(unsigned char *)>(property, [](unsigned char *pointer){ XFree(pointer); });
+
+        if(xa_ret_type != xa_prop_type)
+        {
+            qDebug("Invalid type of %s property.\n", prop_name);
+
+            return {};
+        }
+
+        /* null terminate the result to make string handling easier */
+        tmp_size = (ret_format / 8) * ret_nitems;
+
+        /* UBUNTU PATCH Correct 64 Architecture implementation of 32 bit data */
+        if(ret_format==32) tmp_size *= sizeof(long)/4;
+
+        return QString::fromLocal8Bit(reinterpret_cast<const char*>(ret_prop.get()), tmp_size);
+    }
+
+    QString get_window_title(Display *disp, Window win)
+    {
+        QString wm_name = get_property(disp, win, XA_STRING, "WM_NAME");
+        QString net_wm_name = get_property(disp, win, XInternAtom(disp, "UTF8_STRING", False), "_NET_WM_NAME");
+
+        if(!net_wm_name.isNull())
+            return net_wm_name;
+        else
+            return wm_name;
+    }
+
+    QString get_window_class(Display *disp, Window win)
+    {
+        return get_property(disp, win, XA_STRING, "WM_CLASS");
+    }
+#endif
+
 	QString WindowHandle::title() const
 	{
-#ifdef Q_OS_LINUX
-		QString name;
-		char *str = 0;
-
-		if(XFetchName(QX11Info::display(), mValue, &str))
-			name = QString::fromLatin1(str);
-
-		XFree(str);
-		return name;
+#ifdef Q_OS_UNIX
+        return get_window_title(QX11Info::display(), mValue);
 #endif
 #ifdef Q_OS_WIN
 		QString title;
@@ -57,7 +131,7 @@ namespace ActionTools
 		{
 			wchar_t *titleName = new wchar_t[titleLength + 1];
 
-            titleLength = GetWindowText(reinterpret_cast<HWND>(mValue), titleName, titleLength + 1);
+            GetWindowText(reinterpret_cast<HWND>(mValue), titleName, titleLength + 1);
 			title = QString::fromWCharArray(titleName);
 
 			delete[] titleName;
@@ -69,16 +143,8 @@ namespace ActionTools
 
 	QString WindowHandle::classname() const
 	{
-#ifdef Q_OS_LINUX
-		XClassHint *hint = XAllocClassHint();
-		QString back;
-
-		if(XGetClassHint(QX11Info::display(), mValue, hint))
-			back = QString::fromLatin1(hint->res_class);
-
-		XFree(hint);
-
-		return back;
+#ifdef Q_OS_UNIX
+        return get_window_class(QX11Info::display(), mValue);
 #endif
 #ifdef Q_OS_WIN
 		wchar_t className[255];
@@ -91,11 +157,11 @@ namespace ActionTools
 
 	QRect WindowHandle::rect(bool useBorders) const
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		XWindowAttributes windowAttributes;
 
 		if(!XGetWindowAttributes(QX11Info::display(), mValue, &windowAttributes))
-			return QRect();
+			return {};
 
 		Window unused;
 		int positionX, positionY;
@@ -139,7 +205,7 @@ namespace ActionTools
 
 	int WindowHandle::processId() const
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		static Atom atomPid = None;
 		if(atomPid == None)
 			atomPid = XInternAtom(QX11Info::display(), "_NET_WM_PID", True);
@@ -151,7 +217,7 @@ namespace ActionTools
 		int format;
 		unsigned long items;
 		unsigned long bytesAfter;
-		unsigned char *propPID = 0;
+		unsigned char *propPID = nullptr;
 		int back = -1;
 
 		if(XGetWindowProperty(QX11Info::display(), mValue, atomPid, 0, 1, False, XA_CARDINAL,
@@ -178,7 +244,7 @@ namespace ActionTools
 
 	bool WindowHandle::close() const
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		return XDestroyWindow(QX11Info::display(), mValue);
 #endif
 #ifdef Q_OS_WIN
@@ -188,7 +254,7 @@ namespace ActionTools
 
 	bool WindowHandle::killCreator() const
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		return XKillClient(QX11Info::display(), mValue);
 #endif
 #ifdef Q_OS_WIN
@@ -200,7 +266,7 @@ namespace ActionTools
 
 	bool WindowHandle::setForeground() const
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		static Atom atomActiveWindow = None;
 		if(atomActiveWindow == None)
 			atomActiveWindow = XInternAtom(QX11Info::display(), "_NET_ACTIVE_WINDOW", False);
@@ -242,7 +308,7 @@ namespace ActionTools
 
 	bool WindowHandle::minimize() const
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		return XIconifyWindow(QX11Info::display(), mValue, DefaultScreen(QX11Info::display()));
 #endif
 #ifdef Q_OS_WIN
@@ -252,7 +318,7 @@ namespace ActionTools
 
 	bool WindowHandle::maximize() const
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		static Atom atomState = None;
 		if(atomState == None)
 			atomState = XInternAtom(QX11Info::display(), "_NET_WM_STATE", False);
@@ -291,7 +357,7 @@ namespace ActionTools
 
 	bool WindowHandle::move(QPoint position) const
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		return XMoveWindow(QX11Info::display(), mValue, position.x(), position.y());
 #endif
 #ifdef Q_OS_WIN
@@ -301,7 +367,7 @@ namespace ActionTools
 
 	bool WindowHandle::resize(QSize size, bool useBorders) const
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		if(useBorders)
 		{
 			XWindowAttributes windowAttributes;
@@ -344,7 +410,7 @@ namespace ActionTools
 
 	WindowHandle WindowHandle::foregroundWindow()
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		Window focus;
 		int revert = 0;
 
@@ -373,17 +439,17 @@ namespace ActionTools
 	{
 		gWindowList.clear();
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		static Atom net_clients = None;
 		if(!net_clients)
-			net_clients = XInternAtom(QX11Info::display(), "_NET_CLIENT_LIST_STACKING", True);
+            net_clients = XInternAtom(QX11Info::display(), "_NET_CLIENT_LIST_STACKING", True);
 
 		int count = 0;
-		Window* list = 0;
+		Window* list = nullptr;
 		Atom type = 0;
 		int format = 0;
 		unsigned long after = 0;
-		XGetWindowProperty(QX11Info::display(), QX11Info::appRootWindow(), net_clients, 0, 256 * sizeof(Window), False, AnyPropertyType,
+        XGetWindowProperty(QX11Info::display(), QX11Info::appRootWindow(), net_clients, 0, 256 * sizeof(Window), False, AnyPropertyType,
 						   &type, &format, reinterpret_cast<unsigned long*>(&count), &after, reinterpret_cast<unsigned char**>(&list));
 
 		for (int i = 0; i < count; ++i)
@@ -428,7 +494,7 @@ namespace ActionTools
 				return windowHandle;
 		}
 
-		return WindowHandle();
+		return {};
 	}
 
 	WindowHandle WindowHandle::findWindow(const QRegExp &regExp)
@@ -442,7 +508,7 @@ namespace ActionTools
 				return windowHandle;
 		}
 
-		return WindowHandle();
+		return {};
 	}
 
 	QList<WindowHandle> WindowHandle::findWindows(const QString &title)

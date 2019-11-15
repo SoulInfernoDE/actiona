@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -28,16 +28,24 @@
 
 namespace Actions
 {
-	ActionTools::StringListPair ReadEnvironmentVariableInstance::modes = qMakePair(
-			QStringList() << "allVariables" << "oneVariable",
-            QStringList() << QT_TRANSLATE_NOOP("ReadEnvironmentVariableInstance::modes", "Read all") << QT_TRANSLATE_NOOP("ReadEnvironmentVariableInstance::modes", "Read one"));
+    Tools::StringListPair ReadEnvironmentVariableInstance::modes =
+    {
+        {
+            QStringLiteral("allVariables"),
+            QStringLiteral("oneVariable")
+        },
+        {
+            QStringLiteral(QT_TRANSLATE_NOOP("ReadEnvironmentVariableInstance::modes", "Read all")),
+            QStringLiteral(QT_TRANSLATE_NOOP("ReadEnvironmentVariableInstance::modes", "Read one"))
+        }
+    };
 
 	void ReadEnvironmentVariableInstance::startExecution()
 	{
 		bool ok = true;
 
-		QString variable = evaluateVariable(ok, "variable");
-		Mode mode = evaluateListElement<Mode>(ok, modes, "mode");
+		QString variable = evaluateVariable(ok, QStringLiteral("variable"));
+		Mode mode = evaluateListElement<Mode>(ok, modes, QStringLiteral("mode"));
 
 		if(!ok)
 			return;
@@ -49,13 +57,13 @@ namespace Actions
 
 		for(QString environmentVariableAndValue: environment)
 		{
-			QStringList KeyValue = environmentVariableAndValue.split("=");
+			QStringList KeyValue = environmentVariableAndValue.split(QStringLiteral("="));
 			environmentHashVariableValue[KeyValue.at(0)] = KeyValue.at(1);
 		}
 
         if(mode == oneVariableMode)
 		{
-			QString environmentVariable	= evaluateString(ok, "environmentVariableName");
+			QString environmentVariable	= evaluateString(ok, QStringLiteral("environmentVariableName"));
 
 			if (environmentHashVariableValue.contains(environmentVariable))
 				setVariable(variable, environmentHashVariableValue.value(environmentVariable));
@@ -69,6 +77,6 @@ namespace Actions
 			setArrayKeyValue(variable, environmentHashVariableValue);
 
 
-		emit executionEnded();
+		executionEnded();
 	}
 }

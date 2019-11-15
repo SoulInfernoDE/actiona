@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef CHANGELOGDIALOG_H
-#define CHANGELOGDIALOG_H
+#pragma once
 
 #include "version.h"
 
@@ -43,8 +42,8 @@ public:
 		DownloadOnly
 	};
 
-	explicit ChangelogDialog(QWidget *parent = 0);
-	~ChangelogDialog();
+	explicit ChangelogDialog(QWidget *parent = nullptr);
+	~ChangelogDialog() override;
 
 	void setVersion(const Tools::Version &version);
 	void setReleaseDate(const QDate &releaseDate);
@@ -59,7 +58,6 @@ private slots:
 
 private:
 	Ui::ChangelogDialog *ui;
-	ChangelogAction mChangelogAction;
+	ChangelogAction mChangelogAction{None};
 };
 
-#endif // CHANGELOGDIALOG_H

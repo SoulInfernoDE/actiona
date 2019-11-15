@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef ACTIONFACTORY_H
-#define ACTIONFACTORY_H
+#pragma once
 
 #include "actiontools_global.h"
 #include "actiondefinitionenums.h"
@@ -37,8 +36,8 @@ namespace ActionTools
 		Q_OBJECT
 
 	public:
-		explicit ActionFactory(QObject *parent = 0);
-		~ActionFactory();
+		explicit ActionFactory(QObject *parent = nullptr);
+		~ActionFactory() override ;
 
 		void loadActionPacks(const QString &directory, const QString &locale);
 		ActionDefinition *actionDefinition(const QString &actionId) const;
@@ -62,4 +61,3 @@ namespace ActionTools
 	};
 }
 
-#endif // ACTIONFACTORY_H

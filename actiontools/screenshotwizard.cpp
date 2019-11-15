@@ -1,6 +1,6 @@
 /*
     Actiona
-    Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
     Actiona is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,13 +31,11 @@ namespace ActionTools
         mSaveTarget(ResourceSaveTarget)
     {
         setWindowTitle(tr("Screenshot wizard"));
-        setWindowIcon(QIcon(":/images/capture.png"));
+		setWindowIcon(QIcon(QStringLiteral(":/images/capture.png")));
 
         addPage(new ScreenshotWizardPage(this));
         addPage(new SaveScreenshotWizardPage(script, allowSaveToClipboard, this));
     }
 
-    ScreenshotWizard::~ScreenshotWizard()
-    {
-    }
+    ScreenshotWizard::~ScreenshotWizard() = default;
 }

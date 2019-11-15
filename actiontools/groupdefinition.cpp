@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -29,19 +29,18 @@
 namespace ActionTools
 {
 	GroupDefinition::GroupDefinition(QObject *parent)
-        : ElementDefinition(Name(), parent),
-		mMasterList(0),
-		mMasterCodeComboBox(0)
+        : ElementDefinition(Name(), parent)
+		
 	{
 	}
 
-	void GroupDefinition::setMasterList(ListParameterDefinition *masterList)
+    void GroupDefinition::setMasterList(ListParameterDefinition &masterList)
 	{
 		disconnect();
 
-		connect(masterList, SIGNAL(editorBuilt()), this, SLOT(masterEditorBuilt()));
+        connect(&masterList, &ListParameterDefinition::editorBuilt, this, &GroupDefinition::masterEditorBuilt);
 
-		mMasterList = masterList;
+        mMasterList = &masterList;
 	}
 
 	void GroupDefinition::init()
@@ -60,8 +59,8 @@ namespace ActionTools
 	{
 		mMasterCodeComboBox = mMasterList->codeComboBox();
 
-		connect(mMasterCodeComboBox, SIGNAL(editTextChanged(QString)), this, SLOT(masterTextChanged(QString)));
-		connect(mMasterCodeComboBox, SIGNAL(codeChanged(bool)), this, SLOT(masterCodeChanged(bool)));
+        connect(mMasterCodeComboBox, &CodeComboBox::editTextChanged, this, &GroupDefinition::masterTextChanged);
+        connect(mMasterCodeComboBox, &CodeComboBox::codeChanged, this, &GroupDefinition::masterCodeChanged);
 	}
 
 	void GroupDefinition::masterTextChanged(const QString &text)

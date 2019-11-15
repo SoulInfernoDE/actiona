@@ -1,3 +1,106 @@
+3.10.0 (17/07/18)
+Global:
+- Added a keyboard key condition action that allows checking or waiting for a particular key combination to be pressed
+- Added a text to speech action that uses the operating system's voice synthesis capabilities
+- Click action: added an option to reset the cursor position to its former position after the action has finished executing
+- DataInput action: the output variable now contains an empty string if the user cancels the data input dialog
+
+Interface:
+- Added filters allowing to find an action within the script or within the list of available actions
+- Added an action heat map that allows viewing the execution count and time spent per action (available after the first script execution)
+- Improved program loading times
+- Fixed missing script line numbers (regression from previous version)
+- Fixed a slowdown when copy and pasting multiple actions within a big script
+- Fixed a possible bug on the console when running a script for longer than a day
+- Fixed a few minor bugs
+
+3.9.4 (11/05/18)
+Global:
+- Fixed a slowdown occurring when editing an action within a big script
+- Fixed non-translated buttons
+- Fixed various memory leaks
+- Windows: now using Qt 5.6 to build official binaries => removed Webkit web browser, but reduced installer and SFX size
+
+Installer/Packages:
+- Windows installer: fixed missing .dll files used by SQL drivers (like MySQL)
+
+3.9.3 (28/10/17)
+Global:
+- Windows: fixed compatibility with Windows 10
+- SendMail action: fixed a bug where no exception was thrown when an error occured when sending the e-mail
+- Click action: fixed not specifying a position would move the mouse cursor to the upper-left screen position
+- Procedures: fixed a bug where actions were reset when a procedure ends
+- TimeCondition action: fixed the "if after" and "if before" labels not being intuitive (replaced by "if in the future" and "if in the past")
+- MultiDataInput action: fixed stretching occuring at the wrong place
+- DataInput action: fixed default value being capped at 99
+- Windows: fixed Actiona still writing an entry into the registry when starting with the --portable parameter
+
+Interface:
+- Linux: added a warning when starting Actiona on a non-X11 session
+
+3.9.2 (28/05/16)
+Global:
+- Windows: fixed mouse and keyboard simulation on some applications (started with admin privileges)
+
+Code:
+- fixed loadUI and include functions not using the current script or code filename directory as working directory
+- added the Execution.filename readonly property, containing the current script or code filename
+- ActionPackSystem, Debian/Ubuntu/...: fixed a crash when using the System object
+- ActionPackData: fixed crash when trying to read a non-existing key
+
+Installer/Packages:
+- Windows installer: fixed setup of PATH environment variable and removal when uninstalling
+
+3.9.1 (04/11/15)
+Global:
+- Windows: fixed click simulation failures in some cases
+- fixed a crash when canceling a script execution while a key was being pressed
+- fixed SFX scripts not being run when a local installation of Actiona was required
+
+Interface:
+- Windows: fixed keyboard shortcuts not working
+- Debian/Ubuntu/...: fixed a bug preventing the main window to be displayed on recent distribution versions
+- fixed a crash when right-clicking a "go to a line" exception field
+- fixed a bug preventing the selection of a pixel on the screen when the Actiona window was on top of it
+- fixed a bug where the save script progress dialog would stay open when exporting an SFX script
+
+Code:
+- fixed not being able to display the value of an array variable in a text field
+- fixed console output by way of code not being displayed until after a call to sleep() or pause()
+- added "pretty printing" of Array and Object
+
+3.9.0 (22/06/15)
+Global:
+- renamed Actionaz to Actiona (sounds better in French)
+- now using Qt5 instead of Qt4 (minimal version is 5.2)
+- ActionDataInput: added editor type (line, multiline or password)
+- added a SendMail action
+- Windows: added a "no unicode character" option to the WriteText action, should allow for a limited text writing in some applications like Remote Desktop
+- fixed DataInput & MultiDataInput not opening URLS in their question fields
+- fixed a crash when using the ChooseWindow button (fixes #31)
+- Linux: fixed missing F1-F35 keys in the KeyMapper
+- WriteIniFile: fixed a bug that prevented the creation of new ini files
+- Windows: fixed keyboard keys not being simulated on some applications (Remote Desktop for example) Note that this doesn't include simulating unicode text input, for which there is, afaik, no solution
+
+Interface:
+- enabled secure connections for checking Internet connectivity, fetching update information and downloading new versions
+- added a language change setting
+- now checking if the SFX files are available to enable/disable the export SFX feature
+- fixed a bug preventing saving the values of some settings (caused by the Qt5 migration): users will see those settings reset to their default values
+- fixed a bug in localized tab names in action dialogs
+- removed unused context help button on dialogs
+
+Code:
+- added a Mail object
+- added ProcessHandle::parentId()
+- added a MultilineText option to the InputDialog object
+- added Console.clear()
+- Image: added the pixels() and pixelData() methods to retreive the pixel values at once
+
+Internal:
+- replaced RudeConfig with boost::property_tree
+- replaced Qt's foreach by C++11's range-based for
+
 3.8.0 (09/03/14)
 Global:
 - added in-script resources

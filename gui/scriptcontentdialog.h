@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef SCRIPTCONTENTDIALOG_H
-#define SCRIPTCONTENTDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -44,10 +43,10 @@ public:
 		Write
 	};
 
-	ScriptContentDialog(Type type, ActionTools::Script *script, QWidget *parent = 0);
-    ~ScriptContentDialog();
+	ScriptContentDialog(Type type, ActionTools::Script *script, QWidget *parent = nullptr);
+    ~ScriptContentDialog() override;
 	
-	void accept();
+	void accept() override;
 
 	void setText(const QString &text);
 	QString text() const;
@@ -61,4 +60,3 @@ private:
 	ActionTools::Script *mScript;
 };
 
-#endif // SCRIPTCONTENTDIALOG_H

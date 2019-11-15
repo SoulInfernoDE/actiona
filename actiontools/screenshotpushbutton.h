@@ -1,6 +1,6 @@
 /*
     Actiona
-    Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
     Actiona is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
     Contact : jmgr@jmgr.info
 */
 
-#ifndef SCREENSHOTPUSHBUTTON_H
-#define SCREENSHOTPUSHBUTTON_H
+#pragma once
 
 #include "actiontools_global.h"
 
@@ -32,11 +31,10 @@ namespace ActionTools
         Q_OBJECT
 
     public:
-        explicit ScreenshotPushButton(QWidget *parent = 0);
+        explicit ScreenshotPushButton(QWidget *parent = nullptr);
 
     private:
         Q_DISABLE_COPY(ScreenshotPushButton)
     };
 }
 
-#endif // SCREENSHOTPUSHBUTTON_H

@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef KEYBOARD_H
-#define KEYBOARD_H
+#pragma once
 
 #include "../keyboarddevice.h"
 #include "code/codeclass.h"
@@ -40,16 +39,15 @@ namespace Code
 		Keyboard();
 
 	public slots:
-        QString toString() const                                { return "Keyboard"; }
-        virtual bool equals(const QScriptValue &other) const    { return defaultEqualsImplementation<Keyboard>(other); }
+		QString toString() const override                                { return QStringLiteral("Keyboard"); }
+        bool equals(const QScriptValue &other) const override    { return defaultEqualsImplementation<Keyboard>(other); }
 		QScriptValue pressKey(const QString &key);
 		QScriptValue releaseKey(const QString &key);
 		QScriptValue triggerKey(const QString &key);
-		QScriptValue writeText(const QString &text, int delay = 0) const;
+        QScriptValue writeText(const QString &text, int delay = 0, bool noUnicodeCharacters = false) const;
 
 	private:
 		KeyboardDevice mKeyboardDevice;
 	};
 }
 
-#endif // KEYBOARD_H

@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,25 +18,30 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef LINEPARAMETERDEFINITION_H
-#define LINEPARAMETERDEFINITION_H
+#pragma once
 
-#include "listparameterdefinition.h"
+#include "parameterdefinition.h"
 #include "actiontools_global.h"
 
 namespace ActionTools
 {
-	class ACTIONTOOLSSHARED_EXPORT LineParameterDefinition : public ListParameterDefinition
+    class LineComboBox;
+
+    class ACTIONTOOLSSHARED_EXPORT LineParameterDefinition : public ParameterDefinition
 	{
 		Q_OBJECT
 
 	public:
         LineParameterDefinition(const Name &name, QObject *parent)
-            : ListParameterDefinition(name, parent)						{}
+            : ParameterDefinition(name, parent)						{}
 
-		void buildEditors(Script *script, QWidget *parent);
-        void actionUpdate(Script *script);
+        void buildEditors(Script *script, QWidget *parent) override;
+        void load(const ActionInstance *actionInstance) override;
+        void save(ActionInstance *actionInstance) override;
+        void actionUpdate(Script *script) override;
+
+    private:
+        LineComboBox *mLineComboBox;
 	};
 }
 
-#endif // LINEPARAMETERDEFINITION_H

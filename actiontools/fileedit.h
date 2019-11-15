@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef FILEEDIT_H
-#define FILEEDIT_H
+#pragma once
 
 #include "actiontools_global.h"
 #include "subparameter.h"
@@ -49,8 +48,8 @@ namespace ActionTools
 			DirectorySave
 		};
 
-		explicit FileEdit(QWidget *parent = 0);
-		~FileEdit();
+		explicit FileEdit(QWidget *parent = nullptr);
+		~FileEdit() override;
 
 		void setText(const QString &text);
 		QString text() const;
@@ -58,10 +57,10 @@ namespace ActionTools
 		bool isCode() const;
 		void setCode(bool code);
 		void setFromSubParameter(const SubParameter &subParameter);
-		void openEditor(int line = -1, int column = -1);
-		void setCompletionModel(QAbstractItemModel *completionModel);
-        void setParameterContainer(const ParameterContainer *parameterContainer);
-        QSet<QString> findVariables() const;
+		void openEditor(int line = -1, int column = -1) override;
+		void setCompletionModel(QAbstractItemModel *completionModel) override;
+        void setParameterContainer(const ParameterContainer *parameterContainer) override;
+        QSet<QString> findVariables() const override;
 
 		void setMode(Mode mode)						{ mMode = mode; }
 		void setCaption(const QString &caption)		{ mCaption = caption; }
@@ -78,7 +77,7 @@ namespace ActionTools
 
 	private:
 		Ui::FileEdit *ui;
-		Mode mMode;
+		Mode mMode{FileOpen};
 		QString mCaption;
 		QString mFilter;
 		QString mDirectory;
@@ -87,4 +86,3 @@ namespace ActionTools
 	};
 }
 
-#endif // FILEEDIT_H

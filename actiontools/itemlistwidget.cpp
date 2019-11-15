@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ namespace ActionTools
 		ui->itemsListView->setModel(mModel);
 		delete oldModel;
 
-		connect(ui->itemsListView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(selectionChanged(QItemSelection,QItemSelection)));
+        connect(ui->itemsListView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ItemListWidget::selectionChanged);
 
 		selectionChanged(QItemSelection(), QItemSelection());
 	}
@@ -78,7 +78,7 @@ namespace ActionTools
 
 	void ItemListWidget::on_addPushButton_clicked()
 	{
-		QStandardItem *newItem = new QStandardItem();
+		auto newItem = new QStandardItem();
 		mModel->appendRow(newItem);
 
 		ui->itemsListView->edit(newItem->index());

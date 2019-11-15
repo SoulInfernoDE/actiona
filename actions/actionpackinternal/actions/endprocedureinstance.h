@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef ENDPROCEDUREINSTANCE_H
-#define ENDPROCEDUREINSTANCE_H
+#pragma once
 
 #include "actioninstance.h"
 #include "script.h"
@@ -31,13 +30,13 @@ namespace Actions
 		Q_OBJECT
 
 	public:
-		EndProcedureInstance(const ActionTools::ActionDefinition *definition, QObject *parent = 0)
+		EndProcedureInstance(const ActionTools::ActionDefinition *definition, QObject *parent = nullptr)
 			: ActionTools::ActionInstance(definition, parent)										{}
 
-		void startExecution()
+		void startExecution() override
 		{
 			if(script()->hasProcedureCall())
-				setNextLine(script()->popProcedureCall() + 2);//Lines start at 1
+                setNextLine(script()->popProcedureCall() + 2, true);//Lines start at 1
 			else
 			{
 				emit executionException(ActionTools::ActionException::InvalidParameterException, tr("End procedure reached without a call"));
@@ -45,7 +44,7 @@ namespace Actions
 				return;
 			}
 
-			emit executionEnded();
+			executionEnded();
 		}
 
 	private:
@@ -53,4 +52,3 @@ namespace Actions
 	};
 }
 
-#endif // ENDPROCEDUREINSTANCE_H

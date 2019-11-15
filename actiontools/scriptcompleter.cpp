@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ namespace ActionTools
 	
 	QStringList ScriptCompleter::splitPath(const QString &path) const
 	{
-		return path.split(".");
+		return path.split(QStringLiteral("."));
 	}
 	
 	QString ScriptCompleter::pathFromIndex(const QModelIndex &index) const
@@ -44,6 +44,6 @@ namespace ActionTools
 		for(QModelIndex i = index; i.isValid(); i = i.parent())
 			dataList.prepend(model()->data(i, completionRole()).toString());
    
-		return dataList.join(".");
+		return dataList.join(QStringLiteral("."));
 	}
 }

@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ namespace ActionTools
 		codeLineEdit->setEmbedded(true);
 		setLineEdit(codeLineEdit);
 
-		connect(codeLineEdit, SIGNAL(codeChanged(bool)), this, SLOT(codeChanged(bool)));
+        connect(codeLineEdit, &CodeLineEdit::codeChanged, this, &CodeSpinBox::onCodeChanged);
 
 		addActions(codeLineEdit->actions());
 	}
@@ -58,7 +58,7 @@ namespace ActionTools
 	void CodeSpinBox::setFromSubParameter(const SubParameter &subParameter)
 	{
 		setCode(subParameter.isCode());
-		codeLineEdit()->setText(subParameter.value().toString());
+        codeLineEdit()->setText(subParameter.value());
 	}
 
 	void CodeSpinBox::openEditor(int line, int column)
@@ -97,7 +97,7 @@ namespace ActionTools
 		return value;
 	}
 
-	void CodeSpinBox::codeChanged(bool code)
+    void CodeSpinBox::onCodeChanged(bool code)
 	{
 		if(!code)
 		{

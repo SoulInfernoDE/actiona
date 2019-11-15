@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ namespace Code
 
 	QString CodeTools::removeCodeNamespace(const QString &className)
 	{
-		if(className.startsWith("Code::"))
+		if(className.startsWith(QStringLiteral("Code::")))
 			return className.right(className.size() - 6);
 		else
 			return className;

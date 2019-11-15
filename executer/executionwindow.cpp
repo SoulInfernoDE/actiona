@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -34,9 +34,9 @@ namespace LibExecuter
 		setWindowFlags(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
 		ui->debugPushButton->setEnabled(false);
 	
-		connect(ui->cancelPushButton, SIGNAL(clicked()), this, SIGNAL(canceled()));
-		connect(ui->pausePushButton, SIGNAL(clicked()), this, SIGNAL(paused()));
-		connect(ui->debugPushButton, SIGNAL(clicked()), this, SIGNAL(debug()));
+        connect(ui->cancelPushButton, &QPushButton::clicked, this, &ExecutionWindow::canceled);
+        connect(ui->pausePushButton, &QPushButton::clicked, this, &ExecutionWindow::paused);
+        connect(ui->debugPushButton, &QPushButton::clicked, this, &ExecutionWindow::debug);
 	}
 	
 	ExecutionWindow::~ExecutionWindow()
@@ -96,9 +96,9 @@ namespace LibExecuter
 	void ExecutionWindow::setPauseStatus(bool paused)
 	{
 		if(paused)
-			ui->pausePushButton->setIcon(QIcon(":/images/play.png"));
+			ui->pausePushButton->setIcon(QIcon(QStringLiteral(":/images/play.png")));
 		else
-			ui->pausePushButton->setIcon(QIcon(":/images/pause.png"));
+			ui->pausePushButton->setIcon(QIcon(QStringLiteral(":/images/pause.png")));
 	}
 	
 	void ExecutionWindow::onEvaluationResumed()

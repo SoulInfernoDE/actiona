@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -21,6 +21,9 @@
 #include "lineparameterdefinition.h"
 #include "linecombobox.h"
 #include "script.h"
+#include "actioninstance.h"
+
+#include <QDebug>
 
 namespace ActionTools
 {
@@ -28,17 +31,25 @@ namespace ActionTools
 	{
 		ParameterDefinition::buildEditors(script, parent);
 
-		mComboBox = new LineComboBox(script->labels(), script->actionCount(), parent);
+        script->updateLineModel();
 
-		addEditor(mComboBox);
+        mLineComboBox = new LineComboBox(*script, parent);
 
-		emit editorBuilt();
-	}
-	
+        addEditor(mLineComboBox);
+    }
+
+    void LineParameterDefinition::load(const ActionInstance *actionInstance)
+    {
+        mLineComboBox->setFromSubParameter(actionInstance->subParameter(name().original(), QStringLiteral("value")));
+    }
+
+    void LineParameterDefinition::save(ActionInstance *actionInstance)
+    {
+        actionInstance->setSubParameter(name().original(), QStringLiteral("value"), mLineComboBox->isCode(), mLineComboBox->currentText());
+    }
+
     void LineParameterDefinition::actionUpdate(Script *script)
 	{
-		ActionTools::LineComboBox *lineComboBox = qobject_cast<ActionTools::LineComboBox *>(mComboBox);
-		
-		lineComboBox->setup(script->labels(), script->actionCount());
+        script->updateLineModel();
 	}
 }

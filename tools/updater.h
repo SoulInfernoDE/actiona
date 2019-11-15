@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef UPDATER_H
-#define UPDATER_H
+#pragma once
 
 #include "tools_global.h"
 #include "version.h"
@@ -56,16 +55,17 @@ namespace Tools
 			Rpm
 		};
 		
-		Updater(QNetworkAccessManager *networkAccessManager, const QUrl &url, int timeout, QObject *parent = 0);
-		~Updater();
+		Updater(QNetworkAccessManager *networkAccessManager, const QUrl &url, int timeout, QObject *parent = nullptr);
+		~Updater() override ;
 		
-		void checkForUpdates(const QString &program,
-							 const Version &programVersion,
-							 FileType fileType,
-							 ContainerType containerType,
-							 const QString &operatingSystem,
-							 int operatingSystemBits,
-							 const QString &language);
+        void checkForUpdates(const QString &program,
+                             const Version &programVersion,
+                             int programBits,
+                             FileType fileType,
+                             ContainerType containerType,
+                             const QString &operatingSystem,
+                             int operatingSystemBits,
+                             const QString &language);
 		void cancel();
 	
 	signals:
@@ -94,4 +94,3 @@ namespace Tools
 	};
 }
 
-#endif // UPDATER_H

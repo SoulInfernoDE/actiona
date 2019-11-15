@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ namespace ActionTools
 {
     PointListParameterDefinition::PointListParameterDefinition(const Name &name, QObject *parent)
         : ParameterDefinition(name, parent),
-		mPointListWidget(0)
+		mPointListWidget(nullptr)
 	{
 	}
 
@@ -42,13 +42,13 @@ namespace ActionTools
 
 	void PointListParameterDefinition::load(const ActionInstance *actionInstance)
 	{
-		QString pointBuffer = actionInstance->subParameter(name().original(), "value").value().toString();
+		QString pointBuffer = actionInstance->subParameter(name().original(), QStringLiteral("value")).value();
 		QPolygon polygon;
-		QStringList pointStrings = pointBuffer.split(';', QString::SkipEmptyParts);
+		QStringList pointStrings = pointBuffer.split(QLatin1Char(';'), QString::SkipEmptyParts);
 
 		for(const QString &pointString: pointStrings)
 		{
-			QStringList pointComponents = pointString.split(':', QString::SkipEmptyParts);
+			QStringList pointComponents = pointString.split(QLatin1Char(':'), QString::SkipEmptyParts);
 			if(pointComponents.size() != 2)
 				continue;
 
@@ -62,8 +62,8 @@ namespace ActionTools
 	{
 		QString pointBuffer;
 		for(const QPoint &point: mPointListWidget->points())
-			pointBuffer += QString("%1:%2;").arg(point.x()).arg(point.y());
+			pointBuffer += QStringLiteral("%1:%2;").arg(point.x()).arg(point.y());
 
-		actionInstance->setSubParameter(name().original(), "value", pointBuffer);
+		actionInstance->setSubParameter(name().original(), QStringLiteral("value"), pointBuffer);
 	}
 }

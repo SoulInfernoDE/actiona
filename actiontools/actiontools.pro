@@ -1,14 +1,12 @@
 include(../common.pri)
 QT += script \
-    xmlpatterns
-equals(QT_MAJOR_VERSION, 5) {
+    xmlpatterns \
+    widgets
 unix:QT += x11extras
-QT += widgets
-}
 TEMPLATE = lib
 CONFIG += dll
 unix:CONFIG += link_pkgconfig
-unix:PKGCONFIG += opencv
+unix:PKGCONFIG += $$PKGCONFIG_OPENCV
 DEFINES += ACTIONTOOLS_LIBRARY
 TARGET = actiontools
 DESTDIR = ..
@@ -16,8 +14,7 @@ FORMS += codeeditordialog.ui \
     resourcenamedialog.ui \
     screenshotwizardpage.ui \
     savescreenshotwizardpage.ui
-include(globalshortcut/globalshortcut.pri)
-include(qxtcommandoptions/qxtcommandoptions.pri)
+include(qhotkey.pri)
 include(qxtsmtp/qxtsmtp.pri)
 include(qxtcore/qxtcore.pri)
 include(widgets.pri)
@@ -39,7 +36,6 @@ SOURCES += actionfactory.cpp \
     actioninstancebuffer.cpp \
     scriptcompleter.cpp \
     keywords.cpp \
-    messagehandler.cpp \
     actionexception.cpp \
     helpbutton.cpp \
 	keysymhelper.cpp \
@@ -63,7 +59,10 @@ SOURCES += actionfactory.cpp \
     screenshotwizard.cpp \
     screenshotwizardpage.cpp \
     savescreenshotwizardpage.cpp \
-    parametercontainer.cpp
+    parametercontainer.cpp \
+    scriptlinemodel.cpp \
+    keyboardkey.cpp \
+    messagehandler.cpp
 HEADERS += actiontools_global.h \
     actionpack.h \
     actionfactory.h \
@@ -81,10 +80,8 @@ HEADERS += actiontools_global.h \
     keyinput.h \
     actioninstancebuffer.h \
     settings.h \
-    stringlistpair.h \
     scriptcompleter.h \
     keywords.h \
-    messagehandler.h \
     actionexception.h \
     helpbutton.h \
     xdisplayhelper.h \
@@ -113,12 +110,16 @@ HEADERS += actiontools_global.h \
     resourcenamedialog.h \
     screenshotwizard.h \
     screenshotwizardpage.h \
-    savescreenshotwizardpage.h
-equals(QT_MAJOR_VERSION, 4) {
-SOURCES += nativeeventfilteringapplication.cpp
-HEADERS += nativeeventfilteringapplication.h \
-    nativeeventfilter.h
-}
+    savescreenshotwizardpage.h \
+    opencvalgorithms_private.h \
+    scriptlinemodel.h \
+    keyboardkey.hpp \
+    swappairs.hpp \
+    messagehandler.h
+win32:SOURCES += keyboardkey_windows.cpp
+unix:SOURCES += keysym2ucs.cpp \
+    keyboardkey_xkb.cpp
+unix:HEADERS += keysym2ucs.h
 win32:LIBS += -luser32 \
     -ladvapi32 \
     -lgdi32 \
@@ -128,8 +129,7 @@ win32:LIBS += -luser32 \
 	-l$${OPENCV_LIB_IMGPROC}
 unix:LIBS += -lXtst \
 	-lX11
-TRANSLATIONS = ../locale/actiontools_fr_FR.ts \
-                ../locale/actiontools_de_DE.ts
+TRANSLATIONS = ../locale/actiontools_fr_FR.ts
 RESOURCES += actiontools.qrc
 INCLUDEPATH += . \
 	../tools
@@ -141,8 +141,7 @@ unix {
         target.path = $${PREFIX}/$${LIBDIR}/actiona
 
         locales.path = $${PREFIX}/share/actiona/locale
-        locales.files = ../locale/actiontools_fr_FR.qm \
-                        ../locale/actiontools_de_DE.qm
+        locales.files = ../locale/actiontools_fr_FR.qm
 	locales.CONFIG = no_check_exist
 
 	INSTALLS += target locales

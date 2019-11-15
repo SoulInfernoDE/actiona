@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -31,6 +31,10 @@
 #include "linecombobox.h"
 #include "helpbutton.h"
 
+#ifdef ACT_PROFILE
+#include "highresolutiontimer.h"
+#endif
+
 #include <QGroupBox>
 #include <QLabel>
 #include <QTimer>
@@ -44,12 +48,13 @@
 #include <QMenu>
 
 #include <limits>
+#include <algorithm>
 
-ActionDialog::ActionDialog(QAbstractItemModel *completionModel, ActionTools::Script *script, ActionTools::ActionDefinition *actionDefinition, const QString &localeName, QWidget *parent)
+ActionDialog::ActionDialog(QAbstractItemModel *completionModel, ActionTools::Script *script, const ActionTools::ActionDefinition *actionDefinition, const QString &localeName, QWidget *parent)
 	: QDialog(parent),
       ParameterContainer(script),
 	  ui(new Ui::ActionDialog),
-	  mActionInstance(0),
+	  mActionInstance(nullptr),
 	  mScript(script),
 	  mCurrentLine(-1),
 	  mCurrentColumn(-1),
@@ -71,10 +76,10 @@ ActionDialog::ActionDialog(QAbstractItemModel *completionModel, ActionTools::Scr
     ui->buttonBox->button(QDialogButtonBox::Ok)->setDefault(true);
 
 	//Init of texts & images
-	ui->actionIcon->setPixmap(actionDefinition->icon());
-	ui->actionName->setText("<h2>" + actionDefinition->name() + "</h2>");
-	ui->actionDescription->setText("<i>" + actionDefinition->description() + "</i>");
-	ui->helpPushButton->setTopic(QString("%1:actions:%2").arg(localeName.left(2)).arg(actionDefinition->id().toLower()));
+    ui->actionIcon->setPixmap(actionDefinition->cachedIcon());
+	ui->actionName->setText(QStringLiteral("<h2>") + actionDefinition->name() + QStringLiteral("</h2>"));
+	ui->actionDescription->setText(QStringLiteral("<i>") + actionDefinition->description() + QStringLiteral("</i>"));
+	ui->helpPushButton->setTopic(QStringLiteral("%1:actions:%2").arg(localeName.left(2)).arg(actionDefinition->id().toLower()));
 
 	bool worksUnderThisOS = actionDefinition->worksUnderThisOS();
 	ui->actionOSAvailability->setVisible(!worksUnderThisOS);
@@ -83,30 +88,30 @@ ActionDialog::ActionDialog(QAbstractItemModel *completionModel, ActionTools::Scr
 	//Init of tabs & group boxes
 	QStringList tabs = actionDefinition->tabs();
 	if(tabs.count() == 0)
-		tabs << QT_TRANSLATE_NOOP("ActionTabs", "Parameters");
+		tabs << QStringLiteral(QT_TRANSLATE_NOOP("ActionTabs", "Parameters"));
 
 	int tabCount = tabs.count();
 
 	QVector<QGroupBox *> groupBoxes[2];
 
-	for(int parameterType = 0; parameterType < 2; ++parameterType)
+    for(auto &parameterLayout: mParameterLayouts)
 	{
 		for(int i = 0; i < tabCount; ++i)
-			mParameterLayouts[parameterType].append(new QFormLayout);
+            parameterLayout.append(new QFormLayout);
 	}
 
 	int tabIndex = 0;
 	for(const QString &tab: tabs)
 	{
 		QWidget *widget = new QWidget;
-		QVBoxLayout *layout = new QVBoxLayout(widget);
+		auto layout = new QVBoxLayout(widget);
 
 		QGroupBox *inputParametersGroupBox = new QGroupBox(tr("Input parameters"), widget);
-		inputParametersGroupBox->setStyleSheet(QString("QGroupBox { background-color: #DDDDFF; }"));
+		inputParametersGroupBox->setStyleSheet(QStringLiteral("QGroupBox { background-color: #DDDDFF; }"));
 		inputParametersGroupBox->setLayout(mParameterLayouts[InputParameters][tabIndex]);
 		groupBoxes[InputParameters].append(inputParametersGroupBox);
 		QGroupBox *outputParametersGroupBox = new QGroupBox(tr("Output parameters"), widget);
-		outputParametersGroupBox->setStyleSheet(QString("QGroupBox { background-color: #ffedce; }"));
+		outputParametersGroupBox->setStyleSheet(QStringLiteral("QGroupBox { background-color: #ffedce; }"));
 		outputParametersGroupBox->setLayout(mParameterLayouts[OutputParameters][tabIndex]);
 		groupBoxes[OutputParameters].append(outputParametersGroupBox);
 
@@ -116,7 +121,7 @@ ActionDialog::ActionDialog(QAbstractItemModel *completionModel, ActionTools::Scr
 		widget->setLayout(layout);
 
 		mParameterTabWidgets.append(widget);
-        mTabWidget->addTab(widget, QApplication::translate("ActionTabs", tab.toUtf8()));
+		mTabWidget->addTab(widget, QApplication::translate("ActionTabs", tab.toUtf8().constData()));
 
 		++tabIndex;
 	}
@@ -124,10 +129,10 @@ ActionDialog::ActionDialog(QAbstractItemModel *completionModel, ActionTools::Scr
 	ui->parametersLayout->addWidget(mTabWidget);
 	
 	//Init of common parameters
-	QVBoxLayout *commonParametersLayout = new QVBoxLayout;
+	auto commonParametersLayout = new QVBoxLayout;
 	QGroupBox *inputCommonParametersGroupBox = new QGroupBox(tr("Input parameters"), mCommonTabWidget);
-	inputCommonParametersGroupBox->setStyleSheet(QString("QGroupBox { background-color: #DDDDFF; }"));
-	QFormLayout *inputCommonParametersLayout = new QFormLayout;
+	inputCommonParametersGroupBox->setStyleSheet(QStringLiteral("QGroupBox { background-color: #DDDDFF; }"));
+	auto inputCommonParametersLayout = new QFormLayout;
 	
 	mPauseBeforeSpinBox->setToolTip(tr("Pause before executing the action"));
 	mPauseAfterSpinBox->setToolTip(tr("Pause after executing the action"));
@@ -164,8 +169,8 @@ ActionDialog::ActionDialog(QAbstractItemModel *completionModel, ActionTools::Scr
 	if(!elements.empty())
 	{
 		QStringList exceptionActionsNames;
-		for(int i = 0; i < ActionTools::ActionException::ExceptionActionCount; ++i)
-			exceptionActionsNames << QApplication::translate("ActionException::ExceptionActionName", ActionTools::ActionException::ExceptionActionName[i].toLatin1());
+        for(const auto &exceptionActionName: ActionTools::ActionException::ExceptionActionName)
+            exceptionActionsNames << QApplication::translate("ActionException::ExceptionActionName", exceptionActionName.toLatin1().constData());
 
 		QList<ActionTools::ActionException *> actionExceptions = actionDefinition->exceptions();
 
@@ -176,7 +181,7 @@ ActionDialog::ActionDialog(QAbstractItemModel *completionModel, ActionTools::Scr
 
 			if(i < ActionTools::ActionException::ExceptionCount)
 			{
-				exceptionName = QApplication::translate("ActionException::ExceptionName", ActionTools::ActionException::ExceptionName[i].toLatin1());
+				exceptionName = QApplication::translate("ActionException::ExceptionName", ActionTools::ActionException::ExceptionName[i].toLatin1().constData());
 				exceptionId = i;
 			}
 			else
@@ -191,22 +196,22 @@ ActionDialog::ActionDialog(QAbstractItemModel *completionModel, ActionTools::Scr
 			exceptionNameLabel->setProperty("id", exceptionId);
 			mExceptionsLayout->addWidget(exceptionNameLabel, i, 0, Qt::AlignLeft);
 
-			QComboBox *actionComboBox = new QComboBox(this);
+			auto actionComboBox = new QComboBox(this);
 			actionComboBox->addItems(exceptionActionsNames);
 			actionComboBox->setProperty("row", i);
 
-			connect(actionComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(currentExceptionActionChanged(int)));
+			connect(actionComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ActionDialog::currentExceptionActionChanged);
 
 			mExceptionsLayout->addWidget(actionComboBox, i, 1, Qt::AlignCenter);
 
-			ActionTools::LineComboBox *actionLineComboBox = new ActionTools::LineComboBox(mScript->labels(), mScript->actionCount(), this);
+            ActionTools::LineComboBox *actionLineComboBox = new ActionTools::LineComboBox(*mScript, this);
 			actionLineComboBox->codeLineEdit()->setAllowTextCodeChange(false);
 			actionLineComboBox->codeLineEdit()->setShowEditorButton(false);
 
 			mExceptionsLayout->addWidget(actionLineComboBox, i, 2, Qt::AlignCenter);
 		}
 
-		QVBoxLayout *layout = new QVBoxLayout;
+		auto layout = new QVBoxLayout;
 		layout->addLayout(mExceptionsLayout);
 		layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding));
 		mExceptionsTabWidget->setLayout(layout);
@@ -228,7 +233,7 @@ ActionDialog::ActionDialog(QAbstractItemModel *completionModel, ActionTools::Scr
 	{
 		informations = tr("By ");
 		if(!email.isEmpty())
-			informations += QString("<a href=\"mailto:%1\">%2</a>").arg(email).arg(author);
+			informations += QStringLiteral("<a href=\"mailto:%1\">%2</a>").arg(email).arg(author);
 		else
 			informations += author;
 	}
@@ -236,12 +241,12 @@ ActionDialog::ActionDialog(QAbstractItemModel *completionModel, ActionTools::Scr
 	if(!website.isEmpty())
 	{
 		if(!author.isEmpty())
-			informations += " - ";
-		informations += QString("<a href=\"http://%1\">%1</a>").arg(website);
+			informations += QStringLiteral(" - ");
+		informations += QStringLiteral("<a href=\"http://%1\">%1</a>").arg(website);
 	}
 
 	if(!informations.isEmpty())
-		informations += "<br/>";
+		informations += QStringLiteral("<br/>");
 
 	informations += tr("Version %1").arg(version.toString());
 
@@ -255,16 +260,16 @@ ActionDialog::ActionDialog(QAbstractItemModel *completionModel, ActionTools::Scr
 	case ActionTools::Stable:	statusString = tr("Stable"); break;
 	}
 
-	informations += QString(" (%1)").arg(statusString);
+	informations += QStringLiteral(" (%1)").arg(statusString);
 
 	ui->actionInfo->setText(informations);
 	
 	//Init of parameters
 	for(ActionTools::ElementDefinition *element: elements)
 	{
-		if(ActionTools::ParameterDefinition *currentParameter = qobject_cast<ActionTools::ParameterDefinition *>(element))
+		if(auto currentParameter = qobject_cast<ActionTools::ParameterDefinition *>(element))
 			addParameter(currentParameter, currentParameter->tab());
-		else if(ActionTools::GroupDefinition *currentGroup = qobject_cast<ActionTools::GroupDefinition *>(element))
+		else if(auto currentGroup = qobject_cast<ActionTools::GroupDefinition *>(element))
 		{
 			for(ActionTools::ParameterDefinition *parameter: currentGroup->members())
 				addParameter(parameter, currentGroup->tab());
@@ -273,7 +278,7 @@ ActionDialog::ActionDialog(QAbstractItemModel *completionModel, ActionTools::Scr
 
 	for(ActionTools::ElementDefinition *element: elements)
 	{
-		if(ActionTools::GroupDefinition *currentGroup = qobject_cast<ActionTools::GroupDefinition *>(element))
+		if(auto currentGroup = qobject_cast<ActionTools::GroupDefinition *>(element))
 			currentGroup->init();
 	}
 
@@ -308,18 +313,18 @@ QMenu *ActionDialog::createVariablesMenu(QWidget *parent) const
     {
         for(QWidget *editor: parameter->editors())
         {
-            if(ActionTools::AbstractCodeEditor *codeEditor = dynamic_cast<ActionTools::AbstractCodeEditor *>(editor))
+            if(auto codeEditor = dynamic_cast<ActionTools::AbstractCodeEditor *>(editor))
                 thisActionsVariables.unite(codeEditor->findVariables());
         }
     }
 
     QStringList variableList = thisActionsVariables.unite(mOtherActionsVariables).toList();
-    qSort(variableList);
+    std::sort(variableList.begin(), variableList.end());
 
     if(variableList.isEmpty())
-        return 0;
+        return nullptr;
 
-    QMenu *back = new QMenu(parent);
+    auto back = new QMenu(parent);
 
     for(const QString &variable: variableList)
         back->addAction(variable);
@@ -340,11 +345,11 @@ void ActionDialog::accept()
 	{
 		for(int i = 0; i < mExceptionsLayout->rowCount(); ++i)
 		{
-			QLabel *exceptionNameLabel = qobject_cast<QLabel *>(mExceptionsLayout->itemAtPosition(i, 0)->widget());
-			QComboBox *exceptionActionComboBox = qobject_cast<QComboBox *>(mExceptionsLayout->itemAtPosition(i, 1)->widget());
-			ActionTools::LineComboBox *lineComboBox = qobject_cast<ActionTools::LineComboBox *>(mExceptionsLayout->itemAtPosition(i, 2)->widget());
+			auto exceptionNameLabel = qobject_cast<QLabel *>(mExceptionsLayout->itemAtPosition(i, 0)->widget());
+			auto exceptionActionComboBox = qobject_cast<QComboBox *>(mExceptionsLayout->itemAtPosition(i, 1)->widget());
+			auto lineComboBox = qobject_cast<ActionTools::LineComboBox *>(mExceptionsLayout->itemAtPosition(i, 2)->widget());
 			ActionTools::ActionException::Exception exception = static_cast<ActionTools::ActionException::Exception>(exceptionNameLabel->property("id").toInt());
-			ActionTools::ActionException::ExceptionAction exceptionAction = static_cast<ActionTools::ActionException::ExceptionAction>(exceptionActionComboBox->currentIndex());
+			auto exceptionAction = static_cast<ActionTools::ActionException::ExceptionAction>(exceptionActionComboBox->currentIndex());
 
 			mActionInstance->setExceptionActionInstance(exception,
 														ActionTools::ActionException::ExceptionActionInstance(exceptionAction,
@@ -387,7 +392,7 @@ void ActionDialog::postInit()
 #ifdef ACT_PROFILE
 	Tools::HighResolutionTimer timer("ActionDialog postInit");
 #endif
-    mOtherActionsVariables = mScript->findVariables(0, mActionInstance);//Find in all actions except this one
+    mOtherActionsVariables = mScript->findVariables(nullptr, mActionInstance);//Find in all actions except this one
 
 	for(ActionTools::ParameterDefinition *parameter: mParameters)
 	{
@@ -395,15 +400,10 @@ void ActionDialog::postInit()
 		parameter->load(mActionInstance);
 	}
 
+    mScript->updateLineModel();
+
 	if(!mParameters.empty())
 	{
-		for(int i = 0; i < mExceptionsLayout->rowCount(); ++i)
-		{
-			ActionTools::LineComboBox *lineComboBox = qobject_cast<ActionTools::LineComboBox *>(mExceptionsLayout->itemAtPosition(i, 2)->widget());
-
-			lineComboBox->setup(mScript->labels(), mScript->actionCount());
-		}
-
 		const ActionTools::ExceptionActionInstancesHash exceptionActionInstances = mActionInstance->exceptionActionInstances();
 		QList<ActionTools::ActionException *> actionExceptions = mActionInstance->definition()->exceptions();
 
@@ -422,11 +422,14 @@ void ActionDialog::postInit()
 
 			ActionTools::ActionException::ExceptionActionInstance exceptionActionInstance = exceptionActionInstances.value(static_cast<ActionTools::ActionException::Exception>(exceptionId));
 
-			QComboBox *exceptionActionComboBox = qobject_cast<QComboBox *>(mExceptionsLayout->itemAtPosition(i, 1)->widget());
-			ActionTools::LineComboBox *lineComboBox = qobject_cast<ActionTools::LineComboBox *>(mExceptionsLayout->itemAtPosition(i, 2)->widget());
+			auto exceptionActionComboBox = qobject_cast<QComboBox *>(mExceptionsLayout->itemAtPosition(i, 1)->widget());
+			auto lineComboBox = qobject_cast<ActionTools::LineComboBox *>(mExceptionsLayout->itemAtPosition(i, 2)->widget());
+
+            lineComboBox->setCompletionModel(mCompletionModel);
+            lineComboBox->setParameterContainer(this);
 
 			exceptionActionComboBox->setCurrentIndex(exceptionActionInstance.action());
-			lineComboBox->codeLineEdit()->setText(exceptionActionInstance.line());
+            lineComboBox->setValue(lineComboBox->isCode(), exceptionActionInstance.line());
 			lineComboBox->setEnabled(exceptionActionInstance.action() == ActionTools::ActionException::GotoLineExceptionAction);
 		}
 	}
@@ -450,10 +453,10 @@ void ActionDialog::postInit()
 
 				if(!mCurrentSubField.isEmpty())
 				{
-					QString value = mActionInstance->subParameter(mCurrentField, mCurrentSubField).value().toString();
-					if(value.contains('\n'))//Multiline : open the editor
+                    QString value = mActionInstance->subParameter(mCurrentField, mCurrentSubField).value();
+					if(value.contains(QLatin1Char('\n')))//Multiline : open the editor
 					{
-						if(ActionTools::AbstractCodeEditor *codeEditor = dynamic_cast<ActionTools::AbstractCodeEditor *>(editorWidget))
+						if(auto codeEditor = dynamic_cast<ActionTools::AbstractCodeEditor *>(editorWidget))
 							codeEditor->openEditor(mCurrentLine, mCurrentColumn);
 					}
 				}
@@ -467,8 +470,8 @@ void ActionDialog::postInit()
 	{
 		for(int i = 0; i < mExceptionsLayout->rowCount(); ++i)
 		{
-			QLabel *exceptionNameLabel = qobject_cast<QLabel *>(mExceptionsLayout->itemAtPosition(i, 0)->widget());
-			ActionTools::LineComboBox *lineComboBox = qobject_cast<ActionTools::LineComboBox *>(mExceptionsLayout->itemAtPosition(i, 2)->widget());
+			auto exceptionNameLabel = qobject_cast<QLabel *>(mExceptionsLayout->itemAtPosition(i, 0)->widget());
+			auto lineComboBox = qobject_cast<ActionTools::LineComboBox *>(mExceptionsLayout->itemAtPosition(i, 2)->widget());
 			ActionTools::ActionException::Exception exception = static_cast<ActionTools::ActionException::Exception>(exceptionNameLabel->property("id").toInt());
 
 			if(exception == mCurrentException)
@@ -483,11 +486,11 @@ void ActionDialog::postInit()
 
 void ActionDialog::currentExceptionActionChanged(int index)
 {
-	QComboBox *comboBox = qobject_cast<QComboBox *>(sender());
+	auto comboBox = qobject_cast<QComboBox *>(sender());
 	if(!comboBox)
 		return;
 
-	ActionTools::ActionException::ExceptionAction exceptionAction = static_cast<ActionTools::ActionException::ExceptionAction>(index);
+	auto exceptionAction = static_cast<ActionTools::ActionException::ExceptionAction>(index);
 	int row = comboBox->property("row").toInt();
 	QLayoutItem *item = mExceptionsLayout->itemAtPosition(row, 2);
 	if(!item)
@@ -515,7 +518,7 @@ void ActionDialog::addParameter(ActionTools::ParameterDefinition *parameter, int
 		return;
 #endif
 
-	QBoxLayout *layout = new QBoxLayout(parameter->editorsOrientation() == Qt::Horizontal ? QBoxLayout::LeftToRight : QBoxLayout::TopToBottom );
+	auto layout = new QBoxLayout(parameter->editorsOrientation() == Qt::Horizontal ? QBoxLayout::LeftToRight : QBoxLayout::TopToBottom );
 	layout->setMargin(0);
     layout->setSpacing(1);
 
@@ -525,7 +528,7 @@ void ActionDialog::addParameter(ActionTools::ParameterDefinition *parameter, int
 	parameter->buildEditors(mScript, parentWidget);
 	for(QWidget *editor: parameter->editors())
 	{
-		if(ActionTools::AbstractCodeEditor *codeEditor = dynamic_cast<ActionTools::AbstractCodeEditor *>(editor))
+		if(auto codeEditor = dynamic_cast<ActionTools::AbstractCodeEditor *>(editor))
         {
 			codeEditor->setCompletionModel(mCompletionModel);
             codeEditor->setParameterContainer(this);

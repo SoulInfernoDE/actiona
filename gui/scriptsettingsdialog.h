@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef SCRIPTSETTINGSDIALOG_H
-#define SCRIPTSETTINGSDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -33,8 +32,8 @@ class ScriptSettingsDialog : public QDialog
     Q_OBJECT
 
 public:
-	ScriptSettingsDialog(QWidget *parent = 0);
-    ~ScriptSettingsDialog();
+	ScriptSettingsDialog(QWidget *parent = nullptr);
+    ~ScriptSettingsDialog() override;
 
 	void setPauseBefore(int pauseBefore);
 	void setPauseAfter(int pauseAfter);
@@ -46,4 +45,3 @@ private:
     Ui::ScriptSettingsDialog *ui;
 };
 
-#endif // SCRIPTSETTINGSDIALOG_H

@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef RAWDATA_H
-#define RAWDATA_H
+#pragma once
 
 #include "actiontools_global.h"
 #include "codetools.h"
@@ -55,12 +54,12 @@ namespace Code
 		
 		const QByteArray &byteArray() const;
 
-        virtual int additionalMemoryCost() const { return mByteArray.size(); }
+        int additionalMemoryCost() const override { return mByteArray.size(); }
 	
 	public slots:
 		QScriptValue clone() const;
-		bool equals(const QScriptValue &other) const;
-		QString toString() const;
+		bool equals(const QScriptValue &other) const override ;
+		QString toString() const override ;
 		QScriptValue append(const QVariant &data);
 		QScriptValue chop(int n);
 		QScriptValue clear();
@@ -90,4 +89,3 @@ namespace Code
 	};
 }
 
-#endif // RAWDATA_H

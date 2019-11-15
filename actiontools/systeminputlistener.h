@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef SYSTEMINPUTLISTENER_H
-#define SYSTEMINPUTLISTENER_H
+#pragma once
 
 #include "systeminput.h"
 #include "actiontools_global.h"
@@ -38,10 +37,9 @@ namespace ActionTools
 			virtual void mouseButtonReleased(Button button) { Q_UNUSED(button); }
 
 		protected:
-			Listener() {}
-			~Listener() {}
+			Listener() = default;
+			~Listener() = default;
 		};
 	}
 }
 
-#endif // SYSTEMINPUTLISTENER_H

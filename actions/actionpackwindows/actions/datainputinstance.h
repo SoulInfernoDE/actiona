@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef DATAINPUTINSTANCE_H
-#define DATAINPUTINSTANCE_H
+#pragma once
 
 #include "actioninstance.h"
 #include "stringlistpair.h"
@@ -46,13 +45,13 @@ namespace Actions
             PasswordEditorType
         };
 
-		DataInputInstance(const ActionTools::ActionDefinition *definition, QObject *parent = 0);
+		DataInputInstance(const ActionTools::ActionDefinition *definition, QObject *parent = nullptr);
 
-		static ActionTools::StringListPair dataTypes;
-        static ActionTools::StringListPair editorTypes;
+        static Tools::StringListPair dataTypes;
+        static Tools::StringListPair editorTypes;
 
-		void startExecution();
-		void stopExecution();
+		void startExecution() override;
+		void stopExecution() override;
 
 	private slots:
 		void dataEntered(int);
@@ -61,6 +60,8 @@ namespace Actions
 		void canceled();
 
 	private:
+		void endExecution();
+
 		QInputDialog *mInputDialog;
 		QString mVariable;
 		DataType mDataType;
@@ -69,4 +70,3 @@ namespace Actions
 	};
 }
 
-#endif // DATAINPUTINSTANCE_H

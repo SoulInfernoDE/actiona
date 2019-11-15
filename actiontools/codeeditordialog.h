@@ -1,6 +1,6 @@
 /*
 	Actiona
-    Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef CODEEDITORDIALOG_H
-#define CODEEDITORDIALOG_H
+#pragma once
 
 #include "actiontools_global.h"
 
@@ -39,8 +38,8 @@ namespace ActionTools
 	{
 		Q_OBJECT
 	public:
-        CodeEditorDialog(QAbstractItemModel *completionModel, QMenu *variablesMenu, QMenu *resourcesMenu, QWidget *parent = 0);
-		~CodeEditorDialog();
+        CodeEditorDialog(QAbstractItemModel *completionModel, QMenu *variablesMenu, QMenu *resourcesMenu, QWidget *parent = nullptr);
+		~CodeEditorDialog() override ;
 
 		void setText(const QString &text);
 		void setCode(bool code);
@@ -52,7 +51,7 @@ namespace ActionTools
 		bool isCode() const;
 
 	public slots:
-		void accept();
+		void accept() override ;
 
 	private slots:
 		void on_codePushButton_toggled(bool checked);
@@ -74,4 +73,3 @@ namespace ActionTools
 	};
 }
 
-#endif // CODEEDITORDIALOG_H

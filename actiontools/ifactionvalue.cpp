@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@
 
 namespace ActionTools
 {
-	const char *IfActionValue::WAIT = "wait";
-	const char *IfActionValue::GOTO = "goto";
-	const char *IfActionValue::RUNCODE = "run_code";
-	const char *IfActionValue::CALLPROCEDURE = "call_procedure";
+	QLatin1String IfActionValue::WAIT = QLatin1Literal("wait");
+	QLatin1String IfActionValue::GOTO = QLatin1Literal("goto");
+	QLatin1String IfActionValue::RUNCODE = QLatin1Literal("run_code");
+	QLatin1String IfActionValue::CALLPROCEDURE = QLatin1Literal("call_procedure");
 }

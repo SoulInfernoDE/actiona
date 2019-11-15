@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -22,11 +22,18 @@
 
 namespace Actions
 {
-	ActionTools::StringListPair ConsoleInstance::outputs = qMakePair(
-			QStringList() << "information" << "warning" << "error",
-			QStringList()
-			<< QT_TRANSLATE_NOOP("ConsoleInstance::outputs", "Information")
-			<< QT_TRANSLATE_NOOP("ConsoleInstance::outputs", "Warning")
-			<< QT_TRANSLATE_NOOP("ConsoleInstance::outputs", "Error"));
+    Tools::StringListPair ConsoleInstance::outputs =
+    {
+        {
+            QStringLiteral("information"),
+            QStringLiteral("warning"),
+            QStringLiteral("error")
+        },
+        {
+            QStringLiteral(QT_TRANSLATE_NOOP("ConsoleInstance::outputs", "Information")),
+            QStringLiteral(QT_TRANSLATE_NOOP("ConsoleInstance::outputs", "Warning")),
+            QStringLiteral(QT_TRANSLATE_NOOP("ConsoleInstance::outputs", "Error"))
+        }
+    };
 }
 

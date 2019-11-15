@@ -1,6 +1,6 @@
 /*
     Actiona
-    Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
     Actiona is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
     Contact : jmgr@jmgr.info
 */
 
-#ifndef RESOURCENAMEDIALOG_H
-#define RESOURCENAMEDIALOG_H
+#pragma once
 
 #include "actiontools_global.h"
 
@@ -39,13 +38,13 @@ namespace ActionTools
         Q_OBJECT
 
     public:
-        ResourceNameDialog(ActionTools::Script *script, QWidget *parent = 0);
-        ~ResourceNameDialog();
+        ResourceNameDialog(ActionTools::Script *script, QWidget *parent = nullptr);
+        ~ResourceNameDialog() override;
 
         QString resourceName() const;
 
     public slots:
-        virtual void accept();
+        void accept() override;
 
     private slots:
         void onTextChanged(const QString &text);
@@ -58,4 +57,3 @@ namespace ActionTools
     };
 }
 
-#endif // RESOURCENAMEDIALOG_H

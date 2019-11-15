@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef DELETEACTIONLABEL_H
-#define DELETEACTIONLABEL_H
+#pragma once
 
 #include <QPushButton>
 
@@ -28,16 +27,15 @@ class DeleteActionPushButton : public QPushButton
 	Q_OBJECT
 
 public:
-	explicit DeleteActionPushButton(QWidget *parent = 0);
+	explicit DeleteActionPushButton(QWidget *parent = nullptr);
 
 signals:
 	void actionsDropped(QList<int> rows);
 
 private:
-	void dragEnterEvent(QDragEnterEvent *event);
-	void dropEvent(QDropEvent *event);
+	void dragEnterEvent(QDragEnterEvent *event) override;
+	void dropEvent(QDropEvent *event) override;
 
 	Q_DISABLE_COPY(DeleteActionPushButton)
 };
 
-#endif // DELETEACTIONLABEL_H

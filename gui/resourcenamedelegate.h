@@ -1,6 +1,6 @@
 /*
     Actiona
-    Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
     Actiona is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
     Contact : jmgr@jmgr.info
 */
 
-#ifndef RESOURCENAMEDELEGATE_H
-#define RESOURCENAMEDELEGATE_H
+#pragma once
 
 #include <QStyledItemDelegate>
 
@@ -30,14 +29,13 @@ class ResourceNameDelegate : public QStyledItemDelegate
     Q_OBJECT
 
 public:
-    explicit ResourceNameDelegate(ResourceTableWidget *resourceTableWidget, QObject *parent = 0);
+    explicit ResourceNameDelegate(ResourceTableWidget *resourceTableWidget, QObject *parent = nullptr);
     
-    virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-    virtual void setEditorData(QWidget *editor, const QModelIndex &index) const;
-    virtual void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
+    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+    void setEditorData(QWidget *editor, const QModelIndex &index) const override;
+    void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
 
 private:
     ResourceTableWidget *mResourceTableWidget;
 };
 
-#endif // RESOURCENAMEDELEGATE_H

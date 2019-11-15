@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef PROGRESSSPLASHSCREEN_H
-#define PROGRESSSPLASHSCREEN_H
+#pragma once
 
 #include <QSplashScreen>
 
@@ -31,8 +30,8 @@ class ProgressSplashScreen : public QSplashScreen
 	Q_OBJECT
 
 public:
-	ProgressSplashScreen(const QPixmap &pixmap = QPixmap(), Qt::WindowFlags f=0);
-	ProgressSplashScreen(QWidget *parent, const QPixmap &pixmap = QPixmap(), Qt::WindowFlags f=0);
+	ProgressSplashScreen(const QPixmap &pixmap = QPixmap(), Qt::WindowFlags f=nullptr);
+	ProgressSplashScreen(QWidget *parent, const QPixmap &pixmap = QPixmap(), Qt::WindowFlags f=nullptr);
 
 	void setMaximum(int maximum);
 	void setMinimum(int minimum);
@@ -41,18 +40,17 @@ public:
 	void fadeOut();
 
 protected:
-	void drawContents(QPainter *painter);
+	void drawContents(QPainter *painter) override;
 
 private slots:
-	void messageChanged(const QString &message);
+    void onMessageChanged(const QString &message);
 	void opacityCloseUpdate();
 
 private:
 	void init();
 
 	QProgressBar *mProgressBar;
-	float mOpacity;
+	float mOpacity{1.0f};
 	QTimer *mOpacityTimer;
 };
 
-#endif // PROGRESSSPLASHSCREEN_H

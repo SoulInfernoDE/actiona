@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef KEYINPUT_H
-#define KEYINPUT_H
+#pragma once
 
 #include "actiontools_global.h"
 #include "stringlistpair.h"
@@ -79,13 +78,12 @@ namespace ActionTools
 		static unsigned long nativeKey(int key)		{ return mNativeKey[key]; }
 
 	private:
-		static const StringListPair mKeyNames;
+        static const Tools::StringListPair mKeyNames;
 		static bool mInitDone;
 		static unsigned long mNativeKey[KeyCount];
 
-		bool mIsQtKey;
-		int mKey;
+		bool mIsQtKey{false};
+		int mKey{InvalidKey};
 	};
 }
 
-#endif // KEYINPUT_H

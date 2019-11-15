@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ namespace ActionTools
     TextParameterDefinition::TextParameterDefinition(const Name &name, QObject *parent)
         : ParameterDefinition(name, parent),
 		mTextCodeMode(TextAndCode),
-		mLineEdit(0)
+		mLineEdit(nullptr)
 	{
 	}
 
@@ -61,11 +61,11 @@ namespace ActionTools
 
 	void TextParameterDefinition::load(const ActionInstance *actionInstance)
 	{
-		mLineEdit->setFromSubParameter(actionInstance->subParameter(name().original(), "value"));
+		mLineEdit->setFromSubParameter(actionInstance->subParameter(name().original(), QStringLiteral("value")));
 	}
 
 	void TextParameterDefinition::save(ActionInstance *actionInstance)
 	{
-		actionInstance->setSubParameter(name().original(), "value", mLineEdit->isCode(), mLineEdit->text());
+		actionInstance->setSubParameter(name().original(), QStringLiteral("value"), mLineEdit->isCode(), mLineEdit->text());
 	}
 }

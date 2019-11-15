@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -120,13 +120,13 @@ sub get_utf8 {
  */
 #include <QtGlobal>
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 #include <QX11Info>
 #endif
 
 #include "keysymhelper.h"
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 namespace ActionTools
 {
 	void KeySymHelper::loadKeyCodes()
@@ -207,7 +207,7 @@ namespace ActionTools
 
 	const char *KeySymHelper::keyModifiers[] =
 	{
-		NULL, "Mode_switch", "ISO_Level3_Shift"
+		nullptr, "Mode_switch", "ISO_Level3_Shift"
 	};
 
 	const quint16 KeySymHelper::mWCharToKeySym[] =

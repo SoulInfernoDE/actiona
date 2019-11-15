@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef CODEINSTANCE_H
-#define CODEINSTANCE_H
+#pragma once
 
 #include "actioninstance.h"
 
@@ -30,19 +29,19 @@ namespace Actions
 		Q_OBJECT
 
 	public:
-		CodeInstance(const ActionTools::ActionDefinition *definition, QObject *parent = 0)
+		CodeInstance(const ActionTools::ActionDefinition *definition, QObject *parent = nullptr)
 			: ActionTools::ActionInstance(definition, parent)										{}
 
-		void startExecution()
+		void startExecution() override
 		{
 			bool ok = true;
 
-			evaluateString(ok, "code");
+			evaluateString(ok, QStringLiteral("code"));
 
 			if(!ok)
 				return;
 
-			emit executionEnded();
+			executionEnded();
 		}
 
 	private:
@@ -50,4 +49,3 @@ namespace Actions
 	};
 }
 
-#endif // CODEINSTANCE_H

@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 
 #include <QCursor>
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 #include <QX11Info>
 #include <X11/Xlib.h>
 #include <X11/extensions/XTest.h>
@@ -34,8 +34,8 @@
 
 MouseDevice::MouseDevice()
 {
-	for(int i = 0; i < ButtonCount; ++i)
-		mPressedButtons[i] = false;
+    for(bool &pressedButton: mPressedButtons)
+        pressedButton = false;
 }
 
 MouseDevice::~MouseDevice()
@@ -67,7 +67,7 @@ bool MouseDevice::isButtonPressed(Button button) const
 		return false;
 	}
 #endif
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 	Window unusedWindow;
 	int unusedInt;
 	unsigned int buttonMask;
@@ -115,7 +115,7 @@ bool MouseDevice::pressButton(Button button)
 {
 	mPressedButtons[button] = true;
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 	if(!XTestFakeButtonEvent(QX11Info::display(), toX11Button(button), True, CurrentTime))
 		return false;
 	
@@ -124,14 +124,11 @@ bool MouseDevice::pressButton(Button button)
 	
 #ifdef Q_OS_WIN
 	INPUT input;
+    SecureZeroMemory(&input, sizeof(INPUT));
 	input.type = INPUT_MOUSE;
-	input.mi.dx = 0;
-	input.mi.dy = 0;
-	input.mi.mouseData = 0;
 	input.mi.dwFlags = toWinButton(button, true);
-	input.mi.time = 0;
 
-	if(!SendInput(1, &input, sizeof(INPUT)))
+    if(!SendInput(1, &input, sizeof(INPUT)))
 		return false;
 #endif
 	
@@ -142,7 +139,7 @@ bool MouseDevice::releaseButton(Button button)
 {
 	mPressedButtons[button] = false;
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 	if(!XTestFakeButtonEvent(QX11Info::display(), toX11Button(button), False, CurrentTime))
 		return false;
 	
@@ -151,14 +148,11 @@ bool MouseDevice::releaseButton(Button button)
 	
 #ifdef Q_OS_WIN
 	INPUT input;
+    SecureZeroMemory(&input, sizeof(INPUT));
 	input.type = INPUT_MOUSE;
-	input.mi.dx = 0;
-	input.mi.dy = 0;
-	input.mi.mouseData = 0;
 	input.mi.dwFlags = toWinButton(button, false);
-	input.mi.time = 0;
 
-	if(!SendInput(1, &input, sizeof(INPUT)))
+    if(!SendInput(1, &input, sizeof(INPUT)))
 		return false;
 #endif
 	
@@ -167,7 +161,7 @@ bool MouseDevice::releaseButton(Button button)
 
 bool MouseDevice::wheel(int intensity) const
 {
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 	int button;
 	if(intensity < 0)
 	{
@@ -193,21 +187,19 @@ bool MouseDevice::wheel(int intensity) const
 	
 #ifdef Q_OS_WIN
 	INPUT input;
-
+    SecureZeroMemory(&input, sizeof(INPUT));
 	input.type = INPUT_MOUSE;
 	input.mi.dwFlags = MOUSEEVENTF_WHEEL;
-	input.mi.time = 0;
-	input.mi.dwExtraInfo = 0;
 	input.mi.mouseData = intensity * WHEEL_DELTA;
 
-	if(!SendInput(1, &input, sizeof(INPUT)))
+    if(!SendInput(1, &input, sizeof(INPUT)))
 		return false;
 #endif
 	
 	return true;
 }
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 int MouseDevice::toX11Button(Button button) const
 {
 	return button + 1;

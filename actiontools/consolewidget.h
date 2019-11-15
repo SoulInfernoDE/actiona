@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef CONSOLEWIDGET_H
-#define CONSOLEWIDGET_H
+#pragma once
 
 #include "actiontools_global.h"
 
@@ -46,7 +45,8 @@ namespace ActionTools
 		{
 			Information,
 			Warning,
-			Error
+            Error,
+            Separator
 		};
 		enum Source
 		{
@@ -72,10 +72,10 @@ namespace ActionTools
             ResourceRole
 		};
 
-		explicit ConsoleWidget(QWidget *parent = 0);
-		~ConsoleWidget();
+		explicit ConsoleWidget(QWidget *parent = nullptr);
+		~ConsoleWidget() override ;
 		
-		void setup(QStandardItemModel *model = 0);
+		void setup(QStandardItemModel *model = nullptr);
 
 		void addScriptParameterLine(const QString &message, int parameter, int line, int column, Type type);
         void addResourceLine(const QString &message, const QString &resourceKey, Type type);
@@ -86,6 +86,7 @@ namespace ActionTools
 		void addStartSeparator();
 		void addEndSeparator();
 		void clear();
+        void clearExceptSeparators();
 
 		void updateClearButton();
 
@@ -105,7 +106,7 @@ namespace ActionTools
 		void addSeparator(QStandardItem *item);
 
 		Ui::ConsoleWidget *ui;
-		QStandardItemModel *mModel;
+		QStandardItemModel *mModel{nullptr};
 		QDateTime mStartTime;
 
 		Q_DISABLE_COPY(ConsoleWidget)
@@ -115,4 +116,3 @@ namespace ActionTools
 Q_DECLARE_METATYPE(ActionTools::ConsoleWidget::Type)
 Q_DECLARE_METATYPE(ActionTools::ConsoleWidget::Source)
 
-#endif // CONSOLEWIDGET_H

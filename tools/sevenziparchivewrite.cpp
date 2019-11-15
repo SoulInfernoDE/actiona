@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -37,8 +37,8 @@ namespace Tools
 	bool SevenZipArchiveWrite::addFile(const QString &filename)
 	{
 		QStringList arguments;
-		arguments << "a" << "-mmt" << mFilename << filename;
+        arguments << QStringLiteral("a") << QStringLiteral("-mmt") << mFilename << filename;
 
-		return (QProcess::execute(QDir(QApplication::applicationDirPath()).filePath("sfx/7zr.exe"), arguments) == 0);
+        return (QProcess::execute(QDir(QApplication::applicationDirPath()).filePath(QStringLiteral("sfx/7zr.exe")), arguments) == 0);
 	}
 }

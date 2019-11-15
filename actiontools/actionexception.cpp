@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -21,14 +21,15 @@
 #include "actionexception.h"
 
 #include <QDebug>
+#include <QDataStream>
 
 namespace ActionTools
 {
 	QString ActionException::ExceptionName[ExceptionCount] =
 	{
-        QT_TRANSLATE_NOOP("ActionException::ExceptionName", "Invalid parameter"),
-		QT_TRANSLATE_NOOP("ActionException::ExceptionName", "Code error"),
-		QT_TRANSLATE_NOOP("ActionException::ExceptionName", "Timeout")
+		QStringLiteral(QT_TRANSLATE_NOOP("ActionException::ExceptionName", "Invalid parameter")),
+		QStringLiteral(QT_TRANSLATE_NOOP("ActionException::ExceptionName", "Code error")),
+		QStringLiteral(QT_TRANSLATE_NOOP("ActionException::ExceptionName", "Timeout"))
 	};
 	
 	ActionException::ExceptionAction ActionException::ExceptionDefaultAction[ExceptionCount] =
@@ -40,9 +41,9 @@ namespace ActionTools
 
 	QString ActionException::ExceptionActionName[ExceptionActionCount] =
 	{
-		QT_TRANSLATE_NOOP("ActionException::ExceptionActionName", "Stop execution"),
-		QT_TRANSLATE_NOOP("ActionException::ExceptionActionName", "Skip current action"),
-		QT_TRANSLATE_NOOP("ActionException::ExceptionActionName", "Goto a line")
+		QStringLiteral(QT_TRANSLATE_NOOP("ActionException::ExceptionActionName", "Stop execution")),
+		QStringLiteral(QT_TRANSLATE_NOOP("ActionException::ExceptionActionName", "Skip current action")),
+		QStringLiteral(QT_TRANSLATE_NOOP("ActionException::ExceptionActionName", "Goto a line"))
 	};
 
 	QDataStream &operator >> (QDataStream &s, ActionException::Exception &exception)

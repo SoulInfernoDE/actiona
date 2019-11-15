@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,12 +18,12 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef ABSTRACTCODEEDITOR_H
-#define ABSTRACTCODEEDITOR_H
+#pragma once
 
 #include "actiontools_global.h"
 
 #include <QPainter>
+#include <QSet>
 
 class QAbstractItemModel;
 
@@ -34,7 +34,7 @@ namespace ActionTools
 	class ACTIONTOOLSSHARED_EXPORT AbstractCodeEditor
 	{
 	public:
-		virtual ~AbstractCodeEditor()			{}
+		virtual ~AbstractCodeEditor()			= default;
 
 		virtual void openEditor(int line = -1, int column = -1) = 0;
 		virtual void setCompletionModel(QAbstractItemModel *completionModel) = 0;
@@ -43,4 +43,3 @@ namespace ActionTools
 	};
 }
 
-#endif // ABSTRACTCODEEDITOR_H

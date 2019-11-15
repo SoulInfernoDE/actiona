@@ -46,7 +46,7 @@
 
 #if defined(QT_SIMULATOR)
 #  include "simulator/qsysteminfo_simulator_p.h"
-#elif defined(Q_OS_LINUX)
+#elif defined(Q_OS_UNIX)
 #if defined(QT_NO_UPOWER)
 #include "linux/qbatteryinfo_linux_p.h"
 #else
@@ -173,9 +173,7 @@ QBatteryInfo::QBatteryInfo(int batteryIndex, QObject *parent)
 /*!
     Destroys the object
 */
-QBatteryInfo::~QBatteryInfo()
-{
-}
+QBatteryInfo::~QBatteryInfo() = default;
 
 /*!
     \property QBatteryInfo::batteryCount
@@ -371,9 +369,9 @@ QMetaMethod proxyToSourceSignal(const QMetaMethod &proxySignal, QObject *sourceO
     if (!proxySignal.isValid())
         return proxySignal;
     Q_ASSERT(proxySignal.methodType() == QMetaMethod::Signal);
-    Q_ASSERT(sourceObject != 0);
+    Q_ASSERT(sourceObject != nullptr);
     const QMetaObject *sourceMeta = sourceObject->metaObject();
-    int sourceIndex = sourceMeta->indexOfSignal(proxySignal.methodSignature());
+	int sourceIndex = sourceMeta->indexOfSignal(proxySignal.methodSignature().constData());
     Q_ASSERT(sourceIndex != -1);
     return sourceMeta->method(sourceIndex);
 }

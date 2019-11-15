@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,15 +18,14 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef SYSTEMSESSION_H
-#define SYSTEMSESSION_H
+#pragma once
 
 #include <QObject>
 
 class SystemSession
 {
 public:
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 	enum Capabilities
 	{
 		GnomeSessionManager = 1<<0,
@@ -37,7 +36,8 @@ public:
 		FreedesktopUPower = 1<<5,
 		FreedesktopDeviceKit = 1<<6,
 		KdeScreenSaver = 1<<7,
-		KdeKSMServer = 1<<8
+        KdeKSMServer = 1<<8,
+        FreedesktopLogind = 1<<9
 	};
 #endif
 
@@ -52,7 +52,7 @@ public:
 	bool startScreenSaver() const;
 
 private:
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 	bool checkForDBusInterface(const QString &service, const QString &path, const QString &interface, const QString &testMethod, bool systemBus) const;
 	bool checkForDBusInterface(const QString &service, const QString &path, const QString &testMethod, bool systemBus) const;
 	void checkOperatingSystemCapabilities();
@@ -63,4 +63,3 @@ private:
 	Q_DISABLE_COPY(SystemSession)
 };
 
-#endif // SYSTEMSESSION_H

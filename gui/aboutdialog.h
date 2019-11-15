@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef ABOUTDIALOG_H
-#define ABOUTDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -34,8 +33,8 @@ class AboutDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	explicit AboutDialog(QWidget *parent = 0);
-	~AboutDialog();
+	explicit AboutDialog(QWidget *parent = nullptr);
+	~AboutDialog() override;
 
 private slots:
 	void animate();
@@ -47,4 +46,3 @@ private:
 	Q_DISABLE_COPY(AboutDialog)
 };
 
-#endif // ABOUTDIALOG_H

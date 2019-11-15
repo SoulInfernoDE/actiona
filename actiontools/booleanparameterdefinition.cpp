@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ namespace ActionTools
 {
     BooleanParameterDefinition::BooleanParameterDefinition(const Name &name, QObject *parent)
         : ParameterDefinition(name, parent),
-		mBooleanEdit(0)
+		mBooleanEdit(nullptr)
 	{
 	}
 
@@ -41,12 +41,12 @@ namespace ActionTools
 
 	void BooleanParameterDefinition::load(const ActionInstance *actionInstance)
 	{
-		mBooleanEdit->setFromSubParameter(actionInstance->subParameter(name().original(), "value"));
+		mBooleanEdit->setFromSubParameter(actionInstance->subParameter(name().original(), QStringLiteral("value")));
 	}
 
 	void BooleanParameterDefinition::save(ActionInstance *actionInstance)
 	{
-		actionInstance->setSubParameter(name().original(), "value", mBooleanEdit->isCode(), mBooleanEdit->text());
+		actionInstance->setSubParameter(name().original(), QStringLiteral("value"), mBooleanEdit->isCode(), mBooleanEdit->text());
 	}
 }
 

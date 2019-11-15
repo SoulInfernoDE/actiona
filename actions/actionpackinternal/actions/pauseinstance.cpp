@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -22,14 +22,23 @@
 
 namespace Actions
 {
-	ActionTools::StringListPair PauseInstance::units = qMakePair(
-			QStringList() << "milliseconds" << "seconds" << "minutes" << "hours" << "days",
-			QStringList()
-			<< QT_TRANSLATE_NOOP("PauseInstance::units", "Milliseconds")
-			<< QT_TRANSLATE_NOOP("PauseInstance::units", "Seconds")
-			<< QT_TRANSLATE_NOOP("PauseInstance::units", "Minutes")
-			<< QT_TRANSLATE_NOOP("PauseInstance::units", "Hours")
-			<< QT_TRANSLATE_NOOP("PauseInstance::units", "Days"));
+    Tools::StringListPair PauseInstance::units =
+    {
+        {
+            QStringLiteral("milliseconds"),
+            QStringLiteral("seconds"),
+            QStringLiteral("minutes"),
+            QStringLiteral("hours"),
+            QStringLiteral("days")
+        },
+        {
+            QStringLiteral(QT_TRANSLATE_NOOP("PauseInstance::units", "Milliseconds")),
+            QStringLiteral(QT_TRANSLATE_NOOP("PauseInstance::units", "Seconds")),
+            QStringLiteral(QT_TRANSLATE_NOOP("PauseInstance::units", "Minutes")),
+            QStringLiteral(QT_TRANSLATE_NOOP("PauseInstance::units", "Hours")),
+            QStringLiteral(QT_TRANSLATE_NOOP("PauseInstance::units", "Days"))
+        }
+    };
 }
 
 

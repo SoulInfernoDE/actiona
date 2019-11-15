@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ namespace Code
 	QScriptValue Keyboard::pressKey(const QString &key)
 	{
 		if(!mKeyboardDevice.pressKey(key))
-			throwError("PressKeyError", tr("Unable to press the key"));
+			throwError(QStringLiteral("PressKeyError"), tr("Unable to press the key"));
 		
 		return thisObject();
 	}
@@ -43,7 +43,7 @@ namespace Code
 	QScriptValue Keyboard::releaseKey(const QString &key)
 	{
 		if(!mKeyboardDevice.releaseKey(key))
-			throwError("ReleaseKeyError", tr("Unable to release the key"));
+			throwError(QStringLiteral("ReleaseKeyError"), tr("Unable to release the key"));
 		
 		return thisObject();
 	}
@@ -51,15 +51,15 @@ namespace Code
 	QScriptValue Keyboard::triggerKey(const QString &key)
 	{
 		if(!mKeyboardDevice.triggerKey(key))
-			throwError("TriggerKeyError", tr("Unable to trigger the key"));
+			throwError(QStringLiteral("TriggerKeyError"), tr("Unable to trigger the key"));
 		
 		return thisObject();
 	}
 	
-	QScriptValue Keyboard::writeText(const QString &text, int delay) const
+    QScriptValue Keyboard::writeText(const QString &text, int delay, bool noUnicodeCharacters) const
 	{
-		if(!mKeyboardDevice.writeText(text, delay))
-			throwError("WriteTextError", tr("Unable to write the text"));
+        if(!mKeyboardDevice.writeText(text, delay, noUnicodeCharacters))
+			throwError(QStringLiteral("WriteTextError"), tr("Unable to write the text"));
 		
 		return thisObject();
 	}

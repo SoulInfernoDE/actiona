@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef FINDIMAGEINSTANCE_H
-#define FINDIMAGEINSTANCE_H
+#pragma once
 
 #include "actioninstance.h"
 #include "matchingpointlist.h"
@@ -29,6 +28,7 @@
 #include <QTimer>
 
 #include <limits>
+#include <utility>
 
 namespace ActionTools
 {
@@ -62,14 +62,14 @@ namespace Actions
             CannotFindTheImageException
 		};
 
-		FindImageInstance(const ActionTools::ActionDefinition *definition, QObject *parent = 0);
-		~FindImageInstance();
+		FindImageInstance(const ActionTools::ActionDefinition *definition, QObject *parent = nullptr);
+		~FindImageInstance() override;
 
-		static ActionTools::StringListPair sources;
-        static ActionTools::StringListPair methods;
+        static Tools::StringListPair sources;
+        static Tools::StringListPair methods;
 
-		void startExecution();
-        void stopExecution();
+		void startExecution() override;
+        void stopExecution() override;
 
 	private slots:
         void startSearching();
@@ -82,7 +82,7 @@ namespace Actions
         Method mMethod;
 		bool mWindowRelativePosition;
         int mConfidenceMinimum;
-        QList< QPair<QPixmap, QRect> > mImagesToSearchIn;
+        QList<std::pair<QPixmap, QRect>> mImagesToSearchIn;
         QList<ActionTools::WindowHandle> mWindows;
         Source mSource;
         ActionTools::IfActionValue mIfFound;
@@ -98,4 +98,3 @@ namespace Actions
 	};
 }
 
-#endif // FINDIMAGEINSTANCE_H

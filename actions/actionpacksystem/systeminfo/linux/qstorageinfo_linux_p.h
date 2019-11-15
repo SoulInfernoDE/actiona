@@ -63,30 +63,30 @@ class QUDevWrapper;
 
 class QSocketNotifier;
 
-class QStorageInfoPrivate : public QObject
+class QStorageInfo_CustomPrivate : public QObject
 {
     Q_OBJECT
 
 public:
-    QStorageInfoPrivate(QStorageInfo *parent);
-    ~QStorageInfoPrivate();
+    QStorageInfo_CustomPrivate(QStorageInfo_Custom *parent);
+    ~QStorageInfo_CustomPrivate() override;
 
     qlonglong availableDiskSpace(const QString &drive);
     qlonglong totalDiskSpace(const QString &drive);
     QString uriForDrive(const QString &drive);
     QStringList allLogicalDrives();
-    QStorageInfo::DriveType driveType(const QString &drive);
+    QStorageInfo_Custom::DriveType driveType(const QString &drive);
 
 Q_SIGNALS:
     void logicalDriveChanged(const QString &drive, bool added);
 
 protected:
-    void connectNotify(const QMetaMethod &signal);
-    void disconnectNotify(const QMetaMethod &signal);
+    void connectNotify(const QMetaMethod &signal) override;
+    void disconnectNotify(const QMetaMethod &signal) override;
 
 private:
-    QStorageInfo * const q_ptr;
-    Q_DECLARE_PUBLIC(QStorageInfo)
+    QStorageInfo_Custom * const q_ptr;
+    Q_DECLARE_PUBLIC(QStorageInfo_Custom)
 
     int inotifyWatcher;
     int inotifyFileDescriptor;

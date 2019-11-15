@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -40,9 +40,9 @@ namespace ActionTools
 		delete ui->list->itemDelegate();
 		ui->list->setItemDelegate(new PointItemDelegate(this));
 
-        connect(ui->addPositionPushButton, SIGNAL(positionChosen(QPointF)), this, SLOT(positionChosen(QPointF)), Qt::QueuedConnection);
-        connect(ui->capturePathPushButton, SIGNAL(positionChosen(QPointF)), this, SLOT(stopCapture()), Qt::QueuedConnection);
-		connect(&mCaptureTimer, SIGNAL(timeout()), this, SLOT(capture()));
+        connect(ui->addPositionPushButton, &ActionTools::ChoosePositionPushButton::positionChosen, this, &PointListWidget::positionChosen);
+        connect(ui->capturePathPushButton, &ActionTools::ChoosePositionPushButton::positionChosen, this, &PointListWidget::stopCapture);
+        connect(&mCaptureTimer, &QTimer::timeout, this, &PointListWidget::capture);
 	}
 
 	PointListWidget::~PointListWidget()

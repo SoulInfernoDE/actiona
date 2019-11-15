@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -24,62 +24,28 @@
 
 namespace Global
 {
-	QString currentOS()
-	{
-		QString wordSize = (QSysInfo::WordSize == 32) ? QString() : "64";
-
-#ifdef Q_OS_LINUX
-		return "linux" + wordSize;
-#endif
-#ifdef Q_OS_WIN
-		QString windowsName;
-
-		switch(QSysInfo::windowsVersion())
-		{
-		case QSysInfo::WV_95:
-		case QSysInfo::WV_98:
-			windowsName = "98";
-			break;
-		case QSysInfo::WV_Me:
-			windowsName = "me";
-			break;
-		case QSysInfo::WV_NT:
-		case QSysInfo::WV_2000:
-		case QSysInfo::WV_XP:
-		case QSysInfo::WV_2003:
-			windowsName = "xp";
-			break;
-		case QSysInfo::WV_VISTA:
-			windowsName = "vista";
-			break;
-		case QSysInfo::WV_WINDOWS7:
-			windowsName = "seven";
-			break;
-                default:
-                        windowsName = "unknown";
-                        break;
-		}
-
-		return "windows" + windowsName + wordSize;
-#endif
-
-		return "unknown";
-	}
-
 	QString currentOSType()
 	{
 #ifdef Q_OS_LINUX
-		return "linux";
+		return QStringLiteral("linux");
 #endif
 #ifdef Q_OS_WIN
-		return "windows";
+		return QStringLiteral("windows");
 #endif
 
-		return "unknown";
+		return QStringLiteral("unknown");
 	}
 
-	int currentOSBits()
-	{
-		return QSysInfo::WordSize;
-	}
+    int currentOSBits()
+    {
+        if(QSysInfo::currentCpuArchitecture().contains(QStringLiteral("64")))
+            return 64;
+
+        return 32;
+    }
+
+    int applicationBits()
+    {
+        return QSysInfo::WordSize;
+    }
 }

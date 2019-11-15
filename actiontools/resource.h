@@ -1,6 +1,6 @@
 /*
     Actiona
-    Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
     Actiona is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
     Contact : jmgr@jmgr.info
 */
 
-#ifndef RESOURCE_H
-#define RESOURCE_H
+#pragma once
 
 #include "actiontools_global.h"
 
@@ -32,14 +31,11 @@ namespace ActionTools
     class ResourceData : public QSharedData
     {
     public:
-        ResourceData() : type(0)                {}
-        ResourceData(const ResourceData &other) :
-            QSharedData(other),
-            data(other.data),
-            type(other.type)					{}
+        ResourceData() = default;
+        ResourceData(const ResourceData &other) = default;
 
         QByteArray data;
-        int type;
+        int type{0};
     };
 
     class ACTIONTOOLSSHARED_EXPORT Resource
@@ -64,8 +60,7 @@ namespace ActionTools
             setData(data);
             setType(type);
         }
-        Resource(const Resource &other)
-            : d(other.d)						{}
+        Resource(const Resource &other)         = default;
 
         const QByteArray &data() const          { return d->data; }
         Type type() const                       { return static_cast<Type>(d->type); }
@@ -85,4 +80,3 @@ namespace ActionTools
     }
 }
 
-#endif // RESOURCE_H

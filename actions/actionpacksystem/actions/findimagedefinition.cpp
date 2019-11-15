@@ -1,6 +1,6 @@
 /*
     Actiona
-    Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
     Actiona is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,26 +32,26 @@ void Actions::FindImageDefinition::updateAction(ActionTools::ActionInstance *act
         if(exceptions.contains(static_cast<ActionTools::ActionException::Exception>(FindImageInstance::CannotFindTheImageException)))
         {
             const ActionTools::ActionException::ExceptionActionInstance &exceptionAction = exceptions.value(static_cast<ActionTools::ActionException::Exception>(FindImageInstance::CannotFindTheImageException));
-            ActionTools::Parameter ifNotFoundParameter = actionInstance->parameter("ifNotFound");
+			ActionTools::Parameter ifNotFoundParameter = actionInstance->parameter(QStringLiteral("ifNotFound"));
 
             switch(exceptionAction.action())
             {
             case ActionTools::ActionException::StopExecutionExceptionAction:
-                ifNotFoundParameter.setSubParameter("action", false, ActionTools::IfActionParameterDefinition::actions.first[ActionTools::IfActionParameterDefinition::RunCode]);
-                ifNotFoundParameter.setSubParameter("line", true, "Console.printError(\"Script line \" + Script.line + \": Cannot find the image\");\nExecution.stop();");
+				ifNotFoundParameter.setSubParameter(QStringLiteral("action"), false, ActionTools::IfActionParameterDefinition::actions.first[ActionTools::IfActionParameterDefinition::RunCode]);
+				ifNotFoundParameter.setSubParameter(QStringLiteral("line"), true, QStringLiteral("Console.printError(\"Script line \" + Script.line + \": Cannot find the image\");\nExecution.stop();"));
                 break;
             case ActionTools::ActionException::SkipExceptionAction:
-                ifNotFoundParameter.setSubParameter("action", false, ActionTools::IfActionParameterDefinition::actions.first[ActionTools::IfActionParameterDefinition::DoNothing]);
+				ifNotFoundParameter.setSubParameter(QStringLiteral("action"), false, ActionTools::IfActionParameterDefinition::actions.first[ActionTools::IfActionParameterDefinition::DoNothing]);
                 break;
             case ActionTools::ActionException::GotoLineExceptionAction:
-                ifNotFoundParameter.setSubParameter("action", false, ActionTools::IfActionParameterDefinition::actions.first[ActionTools::IfActionParameterDefinition::Goto]);
-                ifNotFoundParameter.setSubParameter("line", false, exceptionAction.line());
+				ifNotFoundParameter.setSubParameter(QStringLiteral("action"), false, ActionTools::IfActionParameterDefinition::actions.first[ActionTools::IfActionParameterDefinition::Goto]);
+				ifNotFoundParameter.setSubParameter(QStringLiteral("line"), false, exceptionAction.line());
                 break;
             default:
                 break;
             }
 
-            actionInstance->setParameter("ifNotFound", ifNotFoundParameter);
+			actionInstance->setParameter(QStringLiteral("ifNotFound"), ifNotFoundParameter);
         }
     }
 }

@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef NAME_H
-#define NAME_H
+#pragma once
 
 #include "actiontools_global.h"
 
@@ -30,19 +29,13 @@ namespace ActionTools
 	class ACTIONTOOLSSHARED_EXPORT Name
 	{
 	public:
-		Name()
-		{
-		}
+        Name() = default;
 		Name(const QString &original, const QString &translated)
 			: mOriginal(original),
 			  mTranslated(translated)
 		{
 		}
-		Name(const Name &other)
-			: mOriginal(other.mOriginal),
-			  mTranslated(other.mTranslated)
-		{
-		}
+        Name(const Name &other) = default;
 
 		void setOriginal(const QString &original) { mOriginal = original; }
 		void setTranslated(const QString &translated) { mTranslated = translated; }
@@ -69,4 +62,3 @@ namespace ActionTools
 	};
 }
 
-#endif // NAME_H

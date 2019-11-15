@@ -1,6 +1,6 @@
 /*
     Actiona
-    Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
     Actiona is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,22 +18,26 @@
     Contact : jmgr@jmgr.info
 */
 
-#ifndef LANGUAGES_H
-#define LANGUAGES_H
+#pragma once
 
 #include "tools_global.h"
-
-#include <QPair>
-#include <QStringList>
+#include "stringlistpair.h"
 
 namespace Tools
 {
-    extern TOOLSSHARED_EXPORT const QPair<QStringList, QStringList> languagesName;
+    class TOOLSSHARED_EXPORT Languages
+    {
+    public:
+        static QString locale();
+        static void installTranslator(const QString &componentName, const QString &locale);
+        static StringListPair languagesName();
+        static int languageNameToIndex(const QString &languageName);
 
-    QString TOOLSSHARED_EXPORT locale();
-    void TOOLSSHARED_EXPORT installQtTranslator(const QString &locale);
-    void TOOLSSHARED_EXPORT installTranslator(const QString &componentName, const QString &locale);
-    int TOOLSSHARED_EXPORT languageNameToIndex(const QString &languageName);
+        Languages() = delete;
+
+    private:
+        static StringListPair m_languagesName;
+        static bool m_areLanguagesNameTranslated;
+    };
 }
 
-#endif // LANGUAGES_H

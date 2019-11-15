@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -22,11 +22,18 @@
 
 namespace Actions
 {
-	ActionTools::StringListPair PixelColorInstance::comparisons = qMakePair(
-			QStringList() << "equal" << "darker" << "lighter",
-			QStringList()
-			<< QT_TRANSLATE_NOOP("PixelColorInstance::comparisons", "Equal")
-			<< QT_TRANSLATE_NOOP("PixelColorInstance::comparisons", "Darker")
-			<< QT_TRANSLATE_NOOP("PixelColorInstance::comparisons", "Lighter"));
+    Tools::StringListPair PixelColorInstance::comparisons =
+    {
+        {
+            QStringLiteral("equal"),
+            QStringLiteral("darker"),
+            QStringLiteral("lighter")
+        },
+        {
+            QStringLiteral(QT_TRANSLATE_NOOP("PixelColorInstance::comparisons", "Equal")),
+            QStringLiteral(QT_TRANSLATE_NOOP("PixelColorInstance::comparisons", "Darker")),
+            QStringLiteral(QT_TRANSLATE_NOOP("PixelColorInstance::comparisons", "Lighter"))
+        }
+    };
 }
 

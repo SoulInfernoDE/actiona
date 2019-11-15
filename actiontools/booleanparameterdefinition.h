@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef BOOLEANPARAMETERDEFINITION_H
-#define BOOLEANPARAMETERDEFINITION_H
+#pragma once
 
 #include "parameterdefinition.h"
 #include "actiontools_global.h"
@@ -34,9 +33,9 @@ namespace ActionTools
 	public:
         BooleanParameterDefinition(const Name &name, QObject *parent);
 
-		void buildEditors(Script *script, QWidget *parent);
-		void load(const ActionInstance *actionInstance);
-		void save(ActionInstance *actionInstance);
+		void buildEditors(Script *script, QWidget *parent) override;
+		void load(const ActionInstance *actionInstance) override;
+		void save(ActionInstance *actionInstance) override;
 
 	private:
 		BooleanEdit *mBooleanEdit;
@@ -45,4 +44,3 @@ namespace ActionTools
 	};
 }
 
-#endif // BOOLEANPARAMETERDEFINITION_H

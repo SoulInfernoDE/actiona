@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ namespace LibExecuter
 
 	QScriptValue CodeStdio::println(QScriptContext *context, QScriptEngine *)
 	{
-		print(QString("%1\n").arg(context->argument(0).toString()));
+		print(QStringLiteral("%1\n").arg(context->argument(0).toString()));
 
 		return context->thisObject();
 	}
@@ -71,6 +71,13 @@ namespace LibExecuter
 
 		return context->thisObject();
 	}
+
+    QScriptValue CodeStdio::clear(QScriptContext *context, QScriptEngine *)
+    {
+        // Do nothing here
+
+        return context->thisObject();
+    }
 
 	void CodeStdio::print(const QString &text)
 	{

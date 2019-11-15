@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef SEVENZIPARCHIVEWRITE_H
-#define SEVENZIPARCHIVEWRITE_H
+#pragma once
 
 #include "tools_global.h"
 
@@ -31,7 +30,7 @@ namespace Tools
 	class TOOLSSHARED_EXPORT SevenZipArchiveWrite : QObject
 	{
 	public:
-		SevenZipArchiveWrite(const QString &filename, QObject *parent = 0);
+		SevenZipArchiveWrite(const QString &filename, QObject *parent = nullptr);
 
 		bool addFile(const QString &filename);
 
@@ -40,4 +39,3 @@ namespace Tools
 	};
 }
 
-#endif // SEVENZIPARCHIVEWRITE_H

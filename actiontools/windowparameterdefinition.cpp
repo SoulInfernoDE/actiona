@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ namespace ActionTools
 {
     WindowParameterDefinition::WindowParameterDefinition(const Name &name, QObject *parent)
         : ParameterDefinition(name, parent),
-		mWindowEdit(0)
+		mWindowEdit(nullptr)
 	{
 	}
 
@@ -43,12 +43,12 @@ namespace ActionTools
 
 	void WindowParameterDefinition::load(const ActionInstance *actionInstance)
 	{
-		mWindowEdit->setFromSubParameter(actionInstance->subParameter(name().original(), "value"));
+		mWindowEdit->setFromSubParameter(actionInstance->subParameter(name().original(), QStringLiteral("value")));
 	}
 
 	void WindowParameterDefinition::save(ActionInstance *actionInstance)
 	{
-		actionInstance->setSubParameter(name().original(), "value", mWindowEdit->isCode(), mWindowEdit->text());
+		actionInstance->setSubParameter(name().original(), QStringLiteral("value"), mWindowEdit->isCode(), mWindowEdit->text());
 	}
 
     void WindowParameterDefinition::actionUpdate(Script *script)

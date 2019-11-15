@@ -1,6 +1,6 @@
 /*
     Actiona
-    Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
     Actiona is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,13 +32,12 @@ namespace ActionTools
 {
     ScreenshotWizardPage::ScreenshotWizardPage(QWidget *parent)
       : QWizardPage(parent),
-        ui(new Ui::ScreenshotWizardPage),
-        mTargetWindow(0),
-        mDisableEscape(false)
+        ui(new Ui::ScreenshotWizardPage)
+        
     {
         ui->setupUi(this);
 
-        connect(ui->captureWindowPushButton, SIGNAL(searchEnded(ActionTools::WindowHandle)), this, SLOT(onWindowSearchEnded(ActionTools::WindowHandle)));
+        connect(ui->captureWindowPushButton, &ActionTools::ChooseWindowPushButton::searchEnded, this, &ScreenshotWizardPage::onWindowSearchEnded);
 
         QDesktopWidget *desktopWidget = QApplication::desktop();
 
@@ -89,7 +88,7 @@ namespace ActionTools
         if(mTargetWindow)
             delete mTargetWindow;
         mTargetWindow = new ActionTools::TargetWindow;
-        connect(mTargetWindow, SIGNAL(rectangleSelected(QRect)), this, SLOT(onRectangleSelected(QRect)), Qt::QueuedConnection);
+        connect(mTargetWindow, &ActionTools::TargetWindow::rectangleSelected, this, &ScreenshotWizardPage::onRectangleSelected);
         mTargetWindow->show();
 
         emit completeChanged();
@@ -108,7 +107,7 @@ namespace ActionTools
     {
         mDisableEscape = false;
         mTargetWindow->deleteLater();
-        mTargetWindow = 0;
+        mTargetWindow = nullptr;
 
         if(rect != QRect())
         {

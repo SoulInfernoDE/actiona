@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef WINDOWINSTANCE_H
-#define WINDOWINSTANCE_H
+#pragma once
 
 #include "actioninstance.h"
 #include "stringlistpair.h"
@@ -48,15 +47,14 @@ namespace Actions
 			ActionFailedException
 		};
 
-		WindowInstance(const ActionTools::ActionDefinition *definition, QObject *parent = 0);
+		WindowInstance(const ActionTools::ActionDefinition *definition, QObject *parent = nullptr);
 
-		static ActionTools::StringListPair actions;
+        static Tools::StringListPair actions;
 
-		void startExecution();
+		void startExecution() override;
 
 	private:
 		Q_DISABLE_COPY(WindowInstance)
 	};
 }
 
-#endif // WINDOWINSTANCE_H

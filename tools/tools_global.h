@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef TOOLS_GLOBAL_H
-#define TOOLS_GLOBAL_H
+#pragma once
 
 #include <QtGlobal>
 
@@ -29,4 +28,3 @@
 #  define TOOLSSHARED_EXPORT Q_DECL_IMPORT
 #endif
 
-#endif // TOOLS_GLOBAL_H

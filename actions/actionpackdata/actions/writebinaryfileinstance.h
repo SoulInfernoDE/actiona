@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef WRITEBINARYFILEINSTANCE_H
-#define WRITEBINARYFILEINSTANCE_H
+#pragma once
 
 #include "datacopyactioninstance.h"
 
@@ -38,17 +37,17 @@ namespace Actions
 			UnableToWriteFileException = ActionTools::ActionException::UserException
 		};
 
-		WriteBinaryFileInstance(const ActionTools::ActionDefinition *definition, QObject *parent = 0)
+		WriteBinaryFileInstance(const ActionTools::ActionDefinition *definition, QObject *parent = nullptr)
 			: ActionTools::DataCopyActionInstance(definition, parent)
 		{
 		}
 
-		void startExecution()
+		void startExecution() override
 		{
 			bool ok = true;
 
-			QString filename = evaluateString(ok, "file");
-            QScriptValue data = evaluateValue(ok, "data");
+			QString filename = evaluateString(ok, QStringLiteral("file"));
+			QScriptValue data = evaluateValue(ok, QStringLiteral("data"));
 
 			if(!ok)
 				return;
@@ -59,17 +58,17 @@ namespace Actions
 
 			if(!DataCopyActionInstance::startCopy(&mDataBuffer, &mFile))
 			{
-				setCurrentParameter("file");
+				setCurrentParameter(QStringLiteral("file"));
 				emit executionException(UnableToWriteFileException, tr("Unable to write to the file \"%1\"").arg(filename));
 				return;
 			}
 
-			emit showProgressDialog("Writing file", 100);
-			emit updateProgressDialog("Writing in progress");
+			emit showProgressDialog(tr("Writing file"), 100);
+			emit updateProgressDialog(tr("Writing in progress"));
 		}
 
 	private:
-		void clean()
+		void clean() override
 		{
 			DataCopyActionInstance::clean();
 
@@ -85,4 +84,3 @@ namespace Actions
 	};
 }
 
-#endif // WRITEBINARYFILEINSTANCE_H

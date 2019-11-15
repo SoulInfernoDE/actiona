@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -27,9 +27,10 @@ namespace Actions
 	TextInstance::TextInstance(const ActionTools::ActionDefinition *definition, QObject *parent)
 		: ActionTools::ActionInstance(definition, parent),
 		  mTimer(new QTimer(this)),
-		  mCurrentCharacter(0)
+          mCurrentCharacter(0),
+          mNoUnicodeCharacters(false)
 	{
-		connect(mTimer, SIGNAL(timeout()), this, SLOT(pressNextKey()));
+        connect(mTimer, &QTimer::timeout, this, &TextInstance::pressNextKey);
 
 		mTimer->setSingleShot(false);
 	}
@@ -38,8 +39,9 @@ namespace Actions
 	{
 		bool ok = true;
 	
-		mText = evaluateString(ok, "text");
-		int pause  = evaluateInteger(ok, "pause");
+		mText = evaluateString(ok, QStringLiteral("text"));
+		int pause  = evaluateInteger(ok, QStringLiteral("pause"));
+		mNoUnicodeCharacters = evaluateBoolean(ok, QStringLiteral("noUnicodeCharacters"));
 
 		if(pause < 0)
 			pause = 0;
@@ -52,13 +54,16 @@ namespace Actions
 		
 		if(pause == 0)
 		{
-			if(!mKeyboardDevice.writeText(mText))
+            if(!mKeyboardDevice.writeText(mText, 0, mNoUnicodeCharacters))
 			{
 				emit executionException(FailedToSendInputException, tr("Unable to write the text"));
 				return;
 			}
 
-			QTimer::singleShot(1, this, SIGNAL(executionEnded()));
+            QTimer::singleShot(1, this, [this]
+            {
+                executionEnded();
+            });
 		}
 		else
 		{
@@ -80,7 +85,7 @@ namespace Actions
 
 	void TextInstance::pressNextKey()
 	{
-		if(!mKeyboardDevice.writeText(QString(mText.at(mCurrentCharacter))))
+        if(!mKeyboardDevice.writeText(QString(mText.at(mCurrentCharacter)), 0, mNoUnicodeCharacters))
 		{
 			mTimer->stop();
 			emit executionException(FailedToSendInputException, tr("Unable to write the text"));
@@ -92,7 +97,10 @@ namespace Actions
 		{
 			mTimer->stop();
 
-			QTimer::singleShot(1, this, SIGNAL(executionEnded()));
+            QTimer::singleShot(1, this, [this]
+            {
+                executionEnded();
+            });
 
 			return;
 		}

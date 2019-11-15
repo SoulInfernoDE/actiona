@@ -1,6 +1,6 @@
 /*
     Actiona
-    Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
     Actiona is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
     Contact : jmgr@jmgr.info
 */
 
-#ifndef MAILATTACHMENT_H
-#define MAILATTACHMENT_H
+#pragma once
 
 #include "code/codeclass.h"
 #include "qxtsmtp/qxtmailattachment.h"
@@ -52,8 +51,9 @@ namespace Code
         const QxtMailAttachment &attachment() const                             { return mAttachment; }
 
     public slots:
-        QString toString() const                                                { return "MailAttachment"; }
-        virtual bool equals(const QScriptValue &other) const                    { return defaultEqualsImplementation<MailAttachment>(other); }
+        QScriptValue clone() const;
+		QString toString() const override                                                { return QStringLiteral("MailAttachment"); }
+        bool equals(const QScriptValue &other) const override                    { return defaultEqualsImplementation<MailAttachment>(other); }
 
         QScriptValue setExtraHeader(const QString &name, const QString &value)  { mAttachment.setExtraHeader(name, value); return thisObject(); }
         QScriptValue removeExtraHeader(const QString &name)                     { mAttachment.removeExtraHeader(name); return thisObject(); }
@@ -66,4 +66,3 @@ namespace Code
     };
 }
 
-#endif // MAILATTACHMENT_H

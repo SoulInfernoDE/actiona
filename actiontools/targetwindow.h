@@ -1,6 +1,6 @@
 /*
     Actiona
-    Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
     Actiona is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,37 +18,28 @@
     Contact : jmgr@jmgr.info
 */
 
-#ifndef TARGETWINDOW_H
-#define TARGETWINDOW_H
+#pragma once
 
 #include <QWidget>
 #include <QTimer>
 
 #include "actiontools_global.h"
 
-#ifdef Q_OS_LINUX
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#ifdef Q_OS_UNIX
 #include <QAbstractNativeEventFilter>
-#else
-#include "nativeeventfilter.h"
-#endif
 #endif
 
 namespace ActionTools
 {
     class ACTIONTOOLSSHARED_EXPORT TargetWindow : public QWidget
-#ifdef Q_OS_LINUX
-#if (QT_VERSION >= 0x050000)//BUG: Cannot use QT_VERSION_CHECK here, or the MOC will consider the condition to be true
+#ifdef Q_OS_UNIX
             , public QAbstractNativeEventFilter
-#else
-            , public NativeEventFilter
-#endif
 #endif
     {
         Q_OBJECT
     public:
         TargetWindow();
-        virtual ~TargetWindow();
+        ~TargetWindow() override;
 
     signals:
         void rectangleSelected(const QRect &rect);
@@ -59,36 +50,29 @@ namespace ActionTools
         virtual void mousePressEvent(QMouseEvent *event);
         virtual void mouseReleaseEvent(QMouseEvent *event);
 #endif
-        virtual void paintEvent(QPaintEvent *event);
-        virtual void showEvent(QShowEvent *event);
-        virtual void hideEvent(QHideEvent *event);
+        void paintEvent(QPaintEvent *event) override;
+        void showEvent(QShowEvent *event) override;
+        void hideEvent(QHideEvent *event) override;
 
     private slots:
         void update();
 
     private:
-#ifdef Q_OS_LINUX
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-        bool x11EventFilter(XEvent *event);
-#else
-        bool nativeEventFilter(const QByteArray &eventType, void *message, long *result);
-#endif
+#ifdef Q_OS_UNIX
+        bool nativeEventFilter(const QByteArray &eventType, void *message, long *result) override;
         void ungrab();
 #endif
         void mouseButtonReleased();
 
         QTimer mUpdateTimer;
         QPoint mMouseClickPosition;
-        bool mMousePressed;
+        bool mMousePressed{false};
         QRect mResult;
-#ifdef Q_OS_LINUX
-        bool mGrabbingPointer;
-        bool mGrabbingKeyboard;
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#ifdef Q_OS_UNIX
+        bool mGrabbingPointer{false};
+        bool mGrabbingKeyboard{false};
         unsigned long mCrossCursor;
-#endif
 #endif
     };
 }
 
-#endif // TARGETWINDOW_H

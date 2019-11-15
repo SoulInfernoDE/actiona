@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef KEYINSTANCE_H
-#define KEYINSTANCE_H
+#pragma once
 
 #include "actioninstance.h"
 #include "../keyboarddevice.h"
@@ -51,14 +50,14 @@ namespace Actions
 			InvalidActionException
 		};
 
-		KeyInstance(const ActionTools::ActionDefinition *definition, QObject *parent = 0);
+		KeyInstance(const ActionTools::ActionDefinition *definition, QObject *parent = nullptr);
 		
-		static ActionTools::StringListPair actions;
-		static ActionTools::StringListPair types;
+        static Tools::StringListPair actions;
+        static Tools::StringListPair types;
 
-		void startExecution();
-		void stopExecution();
-		void stopLongTermExecution();
+		void startExecution() override;
+		void stopExecution() override;
+		void stopLongTermExecution() override;
 
 	private slots:
 		void sendRelease();
@@ -81,4 +80,3 @@ namespace Actions
 	};
 }
 
-#endif // KEYINSTANCE_H

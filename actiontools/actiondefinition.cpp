@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -22,13 +22,14 @@
 #include "actioninstance.h"
 #include "actionexception.h"
 #include "elementdefinition.h"
+#include "groupdefinition.h"
 
 #include <QScriptEngine>
 #include <QScriptValue>
 #include <QSysInfo>
 #include <QApplication>
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 #include <X11/Xlib.h>
 #include <X11/extensions/XTest.h>
 #include "xdisplayhelper.h"
@@ -38,8 +39,18 @@ namespace ActionTools
 {
 	ActionDefinition::~ActionDefinition()
 	{
-		qDeleteAll(mExceptions);
-	}
+        qDeleteAll(mExceptions);
+    }
+
+    QPixmap ActionDefinition::cachedIcon() const
+    {
+        if(!mIcon.isNull())
+            return mIcon;
+
+        mIcon = icon();
+
+        return mIcon;
+    }
 
 	bool ActionDefinition::worksUnderThisOS() const
 	{
@@ -60,34 +71,30 @@ namespace ActionTools
 	
 	QString ActionDefinition::CategoryName[CategoryCount] =
 	{
-		QT_TRANSLATE_NOOP("ActionDefinition::CategoryName", "Windows"),
-		QT_TRANSLATE_NOOP("ActionDefinition::CategoryName", "Device"),
-		QT_TRANSLATE_NOOP("ActionDefinition::CategoryName", "System"),
-		QT_TRANSLATE_NOOP("ActionDefinition::CategoryName", "Internal"),
-		QT_TRANSLATE_NOOP("ActionDefinition::CategoryName", "Data"),
-		QT_TRANSLATE_NOOP("ActionDefinition::CategoryName", "Procedures")
+		QStringLiteral(QT_TRANSLATE_NOOP("ActionDefinition::CategoryName", "Windows")),
+		QStringLiteral(QT_TRANSLATE_NOOP("ActionDefinition::CategoryName", "Device")),
+		QStringLiteral(QT_TRANSLATE_NOOP("ActionDefinition::CategoryName", "System")),
+		QStringLiteral(QT_TRANSLATE_NOOP("ActionDefinition::CategoryName", "Internal")),
+		QStringLiteral(QT_TRANSLATE_NOOP("ActionDefinition::CategoryName", "Data")),
+		QStringLiteral(QT_TRANSLATE_NOOP("ActionDefinition::CategoryName", "Procedures"))
 	};
 
-	QStringList ActionDefinition::StandardTabs = QStringList() << QT_TRANSLATE_NOOP("ActionTabs", "Standard") << QT_TRANSLATE_NOOP("ActionTabs", "Advanced");
+    QStringList ActionDefinition::StandardTabs =
+    {
+        QStringLiteral(QT_TRANSLATE_NOOP("ActionTabs", "Standard")),
+        QStringLiteral(QT_TRANSLATE_NOOP("ActionTabs", "Advanced"))
+    };
 	
-	void ActionDefinition::translateItems(const char *context, StringListPair &items) const
+    void ActionDefinition::translateItems(const char *context, Tools::StringListPair &items) const
 	{
 		for(int index = 0; index < items.second.size(); ++index)
-			items.second[index] = QApplication::instance()->translate(context, items.second.at(index).toLatin1());
-	}
+            items.second[index] = QApplication::instance()->translate(context, items.second.at(index).toLatin1().constData());
+    }
 
-	void ActionDefinition::addElement(ElementDefinition *element, int tab)
-	{
-		if(tab > 0 && tabs().count() > 0)
-		{
-			if(tab < tabs().count())
-				element->setTab(tab);
-			else
-				qWarning("Trying to add an element with an incorrect tab number");
-		}
-
-		mElements.append(element);
-	}
+    GroupDefinition &ActionDefinition::addGroup(int tab)
+    {
+        return *static_cast<GroupDefinition *>(addElement(new GroupDefinition(this), tab));
+    }
 
 	void ActionDefinition::addException(int id, const QString &name)
 	{
@@ -96,7 +103,7 @@ namespace ActionTools
 
 	bool ActionDefinition::requirementCheckXTest(QStringList &missingRequirements) const
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		int unused;
 		XDisplayHelper xDisplayHelper;
 		
@@ -112,5 +119,20 @@ namespace ActionTools
 
 		return true;
 #endif
-	}
+    }
+
+    ElementDefinition *ActionDefinition::addElement(ElementDefinition *element, int tab)
+    {
+        if(tab > 0 && tabs().count() > 0)
+        {
+            if(tab < tabs().count())
+                element->setTab(tab);
+            else
+                qWarning("Trying to add an element with an incorrect tab number");
+        }
+
+        mElements.append(element);
+
+        return element;
+    }
 }

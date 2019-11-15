@@ -1,6 +1,6 @@
 /*
 	Actiona
-    Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+    Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #include <QSharedPointer>
 #include <QPoint>
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 #include <QTimer>
 #include <X11/Xlib.h>
 #include <X11/Xlibint.h>
@@ -42,7 +42,7 @@ namespace ActionTools
 {
 	namespace SystemInput
 	{
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		static XRecordContext gXRecordContext;
 
 		static void xRecordCallback(XPointer, XRecordInterceptData *data)
@@ -54,7 +54,7 @@ namespace ActionTools
 			case XRecordFromServer:
 			case XRecordFromClient:
 				{
-					xEvent *recordData = reinterpret_cast<xEvent *>(safeData.data()->data);
+					auto recordData = reinterpret_cast<xEvent *>(safeData.data()->data);
 
 					switch(recordData->u.u.type)
 					{
@@ -203,17 +203,16 @@ namespace ActionTools
 			return CallNextHookEx(gKeyboardHook, nCode, wParam, lParam);
 		}
 #endif
-		Task *Task::mInstance = 0;
+		Task *Task::mInstance = nullptr;
 
 		Task::Task(QObject *parent)
 			: QObject(parent),
 			  mThread(new QThread(this))
-			, mStarted(false)
-#ifdef Q_OS_LINUX
-			, mProcessRepliesTimer(new QTimer(this))
+#ifdef Q_OS_UNIX
+            ,mProcessRepliesTimer(new QTimer(this))
 #endif
 		{
-			Q_ASSERT(mInstance == 0);
+			Q_ASSERT(mInstance == nullptr);
 
 			mInstance = this;
 
@@ -223,8 +222,8 @@ namespace ActionTools
 			mThread->start();
 #endif
 
-#ifdef Q_OS_LINUX
-			connect(mProcessRepliesTimer, SIGNAL(timeout()), this, SLOT(processReplies()));
+#ifdef Q_OS_UNIX
+            connect(mProcessRepliesTimer, &QTimer::timeout, this, &Task::processReplies);
 
 			start();
 #endif
@@ -245,7 +244,7 @@ namespace ActionTools
 
 			mStarted = true;
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 			XRecordClientSpec clients = XRecordAllClients;
 			XRecordRange *range = XRecordAllocRange();
 
@@ -270,7 +269,7 @@ namespace ActionTools
 				return;
 			}
 
-			XRecordEnableContextAsync(QX11Info::display(), gXRecordContext, &xRecordCallback, 0);
+			XRecordEnableContextAsync(QX11Info::display(), gXRecordContext, &xRecordCallback, nullptr);
 
 			mProcessRepliesTimer->setSingleShot(false);
 			mProcessRepliesTimer->start(0);
@@ -289,7 +288,7 @@ namespace ActionTools
 
 			mStarted = false;
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 			mProcessRepliesTimer->stop();
 
 			XRecordDisableContext(QX11Info::display(), gXRecordContext);
@@ -302,7 +301,7 @@ namespace ActionTools
 #endif
 		}
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 		void Task::processReplies()
 		{
 			//XRecordProcessReplies(QX11Info::display());

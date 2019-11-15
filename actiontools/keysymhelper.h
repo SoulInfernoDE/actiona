@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,12 +18,11 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef KEYSYMHELPER_H
-#define KEYSYMHELPER_H
+#pragma once
 
 #include "actiontools_global.h"
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 #include <X11/Xlib.h>
 
 namespace ActionTools
@@ -55,4 +54,3 @@ namespace ActionTools
 
 #endif
 
-#endif // KEYSYMHELPER_H

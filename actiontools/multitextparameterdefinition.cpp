@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ namespace ActionTools
 {
     MultiTextParameterDefinition::MultiTextParameterDefinition(const Name &name, QObject *parent)
         : ParameterDefinition(name, parent),
-		mItemListWidget(0)
+		mItemListWidget(nullptr)
 	{
 	}
 
@@ -42,17 +42,17 @@ namespace ActionTools
 
 	void MultiTextParameterDefinition::load(const ActionInstance *actionInstance)
 	{
-		QString textBuffer = actionInstance->subParameter(name().original(), "value").value().toString();
+		QString textBuffer = actionInstance->subParameter(name().original(), QStringLiteral("value")).value();
 
-		mItemListWidget->setItems(textBuffer.split('\n', QString::SkipEmptyParts));
+		mItemListWidget->setItems(textBuffer.split(QLatin1Char('\n'), QString::SkipEmptyParts));
 	}
 
 	void MultiTextParameterDefinition::save(ActionInstance *actionInstance)
 	{
 		QString textBuffer;
 		for(const QString &text: mItemListWidget->items())
-			textBuffer += QString("%1\n").arg(text);
+			textBuffer += QStringLiteral("%1\n").arg(text);
 
-		actionInstance->setSubParameter(name().original(), "value", textBuffer);
+		actionInstance->setSubParameter(name().original(), QStringLiteral("value"), textBuffer);
 	}
 }

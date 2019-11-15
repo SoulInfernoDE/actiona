@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef SENDMAILINSTANCE_H
-#define SENDMAILINSTANCE_H
+#pragma once
 
 #include "actioninstance.h"
 #include "script.h"
@@ -50,13 +49,13 @@ namespace Actions
             ErrorWhileSendingEMailException
 		};
 
-        SendMailInstance(const ActionTools::ActionDefinition *definition, QObject *parent = 0);
-        ~SendMailInstance();
+        SendMailInstance(const ActionTools::ActionDefinition *definition, QObject *parent = nullptr);
+        ~SendMailInstance() override;
 
-        static ActionTools::StringListPair attachmentContentTypes;
+        static Tools::StringListPair attachmentContentTypes;
 
-		void startExecution();
-		void stopExecution();
+		void startExecution() override;
+		void stopExecution() override;
 
 	private slots:
         void connectionFailed(const QByteArray &msg);
@@ -80,4 +79,3 @@ namespace Actions
 	};
 }
 
-#endif // SENDMAILINSTANCE_H

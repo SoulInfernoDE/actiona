@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -26,40 +26,40 @@
 #include <QMessageBox>
 #endif
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 #include <QProcess>
 #include <QDBusInterface>
 #include <QDBusReply>
 #endif
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 int SystemSession::mCapabilities = 0;
 #endif
 
 SystemSession::SystemSession()
 {
-#ifdef Q_OS_LINUX
-		if(!mCapabilities)
-			checkOperatingSystemCapabilities();
+#ifdef Q_OS_UNIX
+    if(!mCapabilities)
+        checkOperatingSystemCapabilities();
 #endif
 }
 
 bool SystemSession::logout(bool force) const
 {
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 	if(mCapabilities & GnomeSessionManager)
 	{
-		QDBusInterface dbusInterface("org.gnome.SessionManager", "/org/gnome/SessionManager", "org.gnome.SessionManager", QDBusConnection::sessionBus());
+		QDBusInterface dbusInterface(QStringLiteral("org.gnome.SessionManager"), QStringLiteral("/org/gnome/SessionManager"), QStringLiteral("org.gnome.SessionManager"), QDBusConnection::sessionBus());
 		unsigned int code = (force ? 2 : 1);
-		QDBusMessage reply = dbusInterface.call("Logout", code);
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("Logout"), code);
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
 	}
 	if(mCapabilities & KdeKSMServer)
 	{
-		QDBusInterface dbusInterface("org.kde.ksmserver", "/KSMServer", "org.kde.KSMServerInterface", QDBusConnection::sessionBus());
-		QDBusMessage reply = dbusInterface.call("logout", 0, 3, (force ? 2 : 1));
+		QDBusInterface dbusInterface(QStringLiteral("org.kde.ksmserver"), QStringLiteral("/KSMServer"), QStringLiteral("org.kde.KSMServerInterface"), QDBusConnection::sessionBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("logout"), 0, 3, (force ? 2 : 1));
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
@@ -74,35 +74,43 @@ bool SystemSession::logout(bool force) const
 
 bool SystemSession::restart(bool force) const
 {
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 	if(mCapabilities & GnomeSessionManager)
 	{
-		QDBusInterface dbusInterface("org.gnome.SessionManager", "/org/gnome/SessionManager", "org.gnome.SessionManager", QDBusConnection::sessionBus());
-		QDBusMessage reply = dbusInterface.call("RequestReboot");
+		QDBusInterface dbusInterface(QStringLiteral("org.gnome.SessionManager"), QStringLiteral("/org/gnome/SessionManager"), QStringLiteral("org.gnome.SessionManager"), QDBusConnection::sessionBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("RequestReboot"));
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
 	}
 	if(mCapabilities & KdeKSMServer)
 	{
-		QDBusInterface dbusInterface("org.kde.ksmserver", "/KSMServer", "org.kde.KSMServerInterface", QDBusConnection::sessionBus());
-		QDBusMessage reply = dbusInterface.call("logout", 0, 1, (force ? 2 : 1));
+		QDBusInterface dbusInterface(QStringLiteral("org.kde.ksmserver"), QStringLiteral("/KSMServer"), QStringLiteral("org.kde.KSMServerInterface"), QDBusConnection::sessionBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("logout"), 0, 1, (force ? 2 : 1));
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
 	}
+    if(mCapabilities & FreedesktopLogind)
+    {
+        QDBusInterface dbusInterface(QStringLiteral("org.freedesktop.login1"), QStringLiteral("/org/freedesktop/login1"), QStringLiteral("org.freedesktop.login1.Manager"), QDBusConnection::systemBus());
+        QDBusMessage reply = dbusInterface.call(QStringLiteral("Reboot"), !force);
+
+        if(reply.type() != QDBusMessage::ErrorMessage)
+            return true;
+    }
 	if(mCapabilities & FreedesktopConsoleKit)
 	{
-		QDBusInterface dbusInterface("org.freedesktop.ConsoleKit", "/org/freedesktop/ConsoleKit/Manager", "org.freedesktop.ConsoleKit.Manager", QDBusConnection::systemBus());
-		QDBusMessage reply = dbusInterface.call("Restart");
+		QDBusInterface dbusInterface(QStringLiteral("org.freedesktop.ConsoleKit"), QStringLiteral("/org/freedesktop/ConsoleKit/Manager"), QStringLiteral("org.freedesktop.ConsoleKit.Manager"), QDBusConnection::systemBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("Restart"));
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
 	}
 	if(mCapabilities & FreedesktopHal)
 	{
-		QDBusInterface dbusInterface("org.freedesktop.Hal", "/org/freedesktop/Hal/devices/computer", "org.freedesktop.Hal.Device.SystemPowerManagement", QDBusConnection::systemBus());
-		QDBusMessage reply = dbusInterface.call("Reboot");
+		QDBusInterface dbusInterface(QStringLiteral("org.freedesktop.Hal"), QStringLiteral("/org/freedesktop/Hal/devices/computer"), QStringLiteral("org.freedesktop.Hal.Device.SystemPowerManagement"), QDBusConnection::systemBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("Reboot"));
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
@@ -117,35 +125,43 @@ bool SystemSession::restart(bool force) const
 
 bool SystemSession::shutdown(bool force) const
 {
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 	if(mCapabilities & GnomeSessionManager)
 	{
-		QDBusInterface dbusInterface("org.gnome.SessionManager", "/org/gnome/SessionManager", "org.gnome.SessionManager", QDBusConnection::sessionBus());
-		QDBusMessage reply = dbusInterface.call("RequestShutdown");
+		QDBusInterface dbusInterface(QStringLiteral("org.gnome.SessionManager"), QStringLiteral("/org/gnome/SessionManager"), QStringLiteral("org.gnome.SessionManager"), QDBusConnection::sessionBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("RequestShutdown"));
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
 	}
 	if(mCapabilities & KdeKSMServer)
 	{
-		QDBusInterface dbusInterface("org.kde.ksmserver", "/KSMServer", "org.kde.KSMServerInterface", QDBusConnection::sessionBus());
-		QDBusMessage reply = dbusInterface.call("logout", 0, 2, (force ? 2 : 1));
+		QDBusInterface dbusInterface(QStringLiteral("org.kde.ksmserver"), QStringLiteral("/KSMServer"), QStringLiteral("org.kde.KSMServerInterface"), QDBusConnection::sessionBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("logout"), 0, 2, (force ? 2 : 1));
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
 	}
+    if(mCapabilities & FreedesktopLogind)
+    {
+        QDBusInterface dbusInterface(QStringLiteral("org.freedesktop.login1"), QStringLiteral("/org/freedesktop/login1"), QStringLiteral("org.freedesktop.login1.Manager"), QDBusConnection::systemBus());
+        QDBusMessage reply = dbusInterface.call(QStringLiteral("PowerOff"), !force);
+
+        if(reply.type() != QDBusMessage::ErrorMessage)
+            return true;
+    }
 	if(mCapabilities & FreedesktopConsoleKit)
 	{
-		QDBusInterface dbusInterface("org.freedesktop.ConsoleKit", "/org/freedesktop/ConsoleKit/Manager", "org.freedesktop.ConsoleKit.Manager", QDBusConnection::systemBus());
-		QDBusMessage reply = dbusInterface.call("Stop");
+		QDBusInterface dbusInterface(QStringLiteral("org.freedesktop.ConsoleKit"), QStringLiteral("/org/freedesktop/ConsoleKit/Manager"), QStringLiteral("org.freedesktop.ConsoleKit.Manager"), QDBusConnection::systemBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("Stop"));
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
 	}
 	if(mCapabilities & FreedesktopHal)
 	{
-		QDBusInterface dbusInterface("org.freedesktop.Hal", "/org/freedesktop/Hal/devices/computer", "org.freedesktop.Hal.Device.SystemPowerManagement", QDBusConnection::systemBus());
-		QDBusMessage reply = dbusInterface.call("Shutdown");
+		QDBusInterface dbusInterface(QStringLiteral("org.freedesktop.Hal"), QStringLiteral("/org/freedesktop/Hal/devices/computer"), QStringLiteral("org.freedesktop.Hal.Device.SystemPowerManagement"), QDBusConnection::systemBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("Shutdown"));
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
@@ -160,29 +176,29 @@ bool SystemSession::shutdown(bool force) const
 
 bool SystemSession::suspend(bool force) const
 {
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 	Q_UNUSED(force)
 
 	if(mCapabilities & FreedesktopUPower)
 	{
-		QDBusInterface dbusInterface("org.freedesktop.UPower", "/org/freedesktop/UPower", "org.freedesktop.UPower", QDBusConnection::systemBus());
-		QDBusMessage reply = dbusInterface.call("Suspend");
+		QDBusInterface dbusInterface(QStringLiteral("org.freedesktop.UPower"), QStringLiteral("/org/freedesktop/UPower"), QStringLiteral("org.freedesktop.UPower"), QDBusConnection::systemBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("Suspend"));
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
 	}
 	if(mCapabilities & FreedesktopDeviceKit)
 	{
-		QDBusInterface dbusInterface("org.freedesktop.DeviceKit.Power", "/org/freedesktop/DeviceKit/Power", "org.freedesktop.DeviceKit.Power", QDBusConnection::systemBus());
-		QDBusMessage reply = dbusInterface.call("Suspend");
+		QDBusInterface dbusInterface(QStringLiteral("org.freedesktop.DeviceKit.Power"), QStringLiteral("/org/freedesktop/DeviceKit/Power"), QStringLiteral("org.freedesktop.DeviceKit.Power"), QDBusConnection::systemBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("Suspend"));
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
 	}
 	if(mCapabilities & FreedesktopHal)
 	{
-		QDBusInterface dbusInterface("org.freedesktop.Hal", "/org/freedesktop/Hal/devices/computer", "org.freedesktop.Hal.Device.SystemPowerManagement", QDBusConnection::systemBus());
-		QDBusMessage reply = dbusInterface.call("Suspend", 1);
+		QDBusInterface dbusInterface(QStringLiteral("org.freedesktop.Hal"), QStringLiteral("/org/freedesktop/Hal/devices/computer"), QStringLiteral("org.freedesktop.Hal.Device.SystemPowerManagement"), QDBusConnection::systemBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("Suspend"), 1);
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
@@ -197,29 +213,29 @@ bool SystemSession::suspend(bool force) const
 
 bool SystemSession::hibernate(bool force) const
 {
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 	Q_UNUSED(force)
 
 	if(mCapabilities & FreedesktopUPower)
 	{
-		QDBusInterface dbusInterface("org.freedesktop.UPower", "/org/freedesktop/UPower", "org.freedesktop.UPower", QDBusConnection::systemBus());
-		QDBusMessage reply = dbusInterface.call("Hibernate");
+		QDBusInterface dbusInterface(QStringLiteral("org.freedesktop.UPower"), QStringLiteral("/org/freedesktop/UPower"), QStringLiteral("org.freedesktop.UPower"), QDBusConnection::systemBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("Hibernate"));
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
 	}
 	if(mCapabilities & FreedesktopDeviceKit)
 	{
-		QDBusInterface dbusInterface("org.freedesktop.DeviceKit.Power", "/org/freedesktop/DeviceKit/Power", "org.freedesktop.DeviceKit.Power", QDBusConnection::systemBus());
-		QDBusMessage reply = dbusInterface.call("Hibernate");
+		QDBusInterface dbusInterface(QStringLiteral("org.freedesktop.DeviceKit.Power"), QStringLiteral("/org/freedesktop/DeviceKit/Power"), QStringLiteral("org.freedesktop.DeviceKit.Power"), QDBusConnection::systemBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("Hibernate"));
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
 	}
 	if(mCapabilities & FreedesktopHal)
 	{
-		QDBusInterface dbusInterface("org.freedesktop.Hal", "/org/freedesktop/Hal/devices/computer", "org.freedesktop.Hal.Device.SystemPowerManagement", QDBusConnection::systemBus());
-		QDBusMessage reply = dbusInterface.call("Hibernate");
+		QDBusInterface dbusInterface(QStringLiteral("org.freedesktop.Hal"), QStringLiteral("/org/freedesktop/Hal/devices/computer"), QStringLiteral("org.freedesktop.Hal.Device.SystemPowerManagement"), QDBusConnection::systemBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("Hibernate"));
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
@@ -234,23 +250,23 @@ bool SystemSession::hibernate(bool force) const
 
 bool SystemSession::lockScreen() const
 {
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 	if(mCapabilities & GnomeScreenSaver)
 	{
-		QDBusInterface dbusInterface("org.gnome.ScreenSaver", "/ScreenSaver", "org.gnome.ScreenSaver", QDBusConnection::sessionBus());
-		dbusInterface.asyncCall("Lock");
+		QDBusInterface dbusInterface(QStringLiteral("org.gnome.ScreenSaver"), QStringLiteral("/ScreenSaver"), QStringLiteral("org.gnome.ScreenSaver"), QDBusConnection::sessionBus());
+		dbusInterface.asyncCall(QStringLiteral("Lock"));
 		return true;
 	}
 	if(mCapabilities & FreedesktopScreenSaver)
 	{
-		QDBusInterface dbusInterface("org.freedesktop.ScreenSaver", "/ScreenSaver", "org.freedesktop.ScreenSaver", QDBusConnection::sessionBus());
-		dbusInterface.asyncCall("Lock");
+		QDBusInterface dbusInterface(QStringLiteral("org.freedesktop.ScreenSaver"), QStringLiteral("/ScreenSaver"), QStringLiteral("org.freedesktop.ScreenSaver"), QDBusConnection::sessionBus());
+		dbusInterface.asyncCall(QStringLiteral("Lock"));
 		return true;
 	}
 	if(mCapabilities & KdeScreenSaver)
 	{
-		QDBusInterface dbusInterface("org.kde.screensaver", "/ScreenSaver", "org.freedesktop.ScreenSaver", QDBusConnection::sessionBus());
-		dbusInterface.asyncCall("Lock");
+		QDBusInterface dbusInterface(QStringLiteral("org.kde.screensaver"), QStringLiteral("/ScreenSaver"), QStringLiteral("org.freedesktop.ScreenSaver"), QDBusConnection::sessionBus());
+		dbusInterface.asyncCall(QStringLiteral("Lock"));
 		return true;
 	}
 
@@ -263,27 +279,27 @@ bool SystemSession::lockScreen() const
 
 bool SystemSession::startScreenSaver() const
 {
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 	if(mCapabilities & GnomeScreenSaver)
 	{
-		QDBusInterface dbusInterface("org.gnome.ScreenSaver", "/ScreenSaver", "org.gnome.ScreenSaver", QDBusConnection::sessionBus());
-		QDBusMessage reply = dbusInterface.call("SetActive", true);
+		QDBusInterface dbusInterface(QStringLiteral("org.gnome.ScreenSaver"), QStringLiteral("/ScreenSaver"), QStringLiteral("org.gnome.ScreenSaver"), QDBusConnection::sessionBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("SetActive"), true);
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
 	}
 	if(mCapabilities & FreedesktopScreenSaver)
 	{
-		QDBusInterface dbusInterface("org.freedesktop.ScreenSaver", "/ScreenSaver", "org.freedesktop.ScreenSaver", QDBusConnection::sessionBus());
-		QDBusMessage reply = dbusInterface.call("SetActive", true);
+		QDBusInterface dbusInterface(QStringLiteral("org.freedesktop.ScreenSaver"), QStringLiteral("/ScreenSaver"), QStringLiteral("org.freedesktop.ScreenSaver"), QDBusConnection::sessionBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("SetActive"), true);
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
 	}
 	if(mCapabilities & KdeScreenSaver)
 	{
-		QDBusInterface dbusInterface("org.kde.screensaver", "/ScreenSaver", "org.freedesktop.ScreenSaver", QDBusConnection::sessionBus());
-		QDBusMessage reply = dbusInterface.call("SetActive", true);
+		QDBusInterface dbusInterface(QStringLiteral("org.kde.screensaver"), QStringLiteral("/ScreenSaver"), QStringLiteral("org.freedesktop.ScreenSaver"), QDBusConnection::sessionBus());
+		QDBusMessage reply = dbusInterface.call(QStringLiteral("SetActive"), true);
 
 		if(reply.type() != QDBusMessage::ErrorMessage)
 			return true;
@@ -298,7 +314,7 @@ bool SystemSession::startScreenSaver() const
 #endif
 }
 
-#ifdef Q_OS_LINUX
+#ifdef Q_OS_UNIX
 bool SystemSession::checkForDBusInterface(const QString &service, const QString &path, const QString &interface, const QString &testMethod, bool systemBus) const
 {
 	QDBusInterface dbusInterface(service, path, interface, systemBus ? QDBusConnection::systemBus() : QDBusConnection::sessionBus());
@@ -309,41 +325,45 @@ bool SystemSession::checkForDBusInterface(const QString &service, const QString 
 
 void SystemSession::checkOperatingSystemCapabilities()
 {
-	mCapabilities |= checkForDBusInterface("org.gnome.SessionManager",
-								  "/org/gnome/SessionManager",
-								  "org.gnome.SessionManager",
-								  "CanShutdown", false) ? GnomeSessionManager : 0;
-	mCapabilities |= checkForDBusInterface("org.gnome.ScreenSaver",
-								  "/ScreenSaver",
-								  "org.gnome.ScreenSaver",
-								  "GetActive", false) ? GnomeScreenSaver : 0;
-	mCapabilities |= checkForDBusInterface("org.freedesktop.ConsoleKit",
-								  "/org/freedesktop/ConsoleKit/Manager",
-								  "org.freedesktop.ConsoleKit.Manager",
-								  "CanRestart", true) ? FreedesktopConsoleKit : 0;
-	mCapabilities |= checkForDBusInterface("org.freedesktop.ScreenSaver",
-								  "/ScreenSaver",
-								  "org.freedesktop.ScreenSaver",
-								  "GetActive", false) ? FreedesktopScreenSaver : 0;
-	mCapabilities |= checkForDBusInterface("org.freedesktop.Hal",
-								  "/org/freedesktop/Hal/devices/computer",
-								  "org.freedesktop.Hal.Device.SystemPowerManagement",
-								  "canShutdown", true) ? FreedesktopHal : 0;
-	mCapabilities |= checkForDBusInterface("org.freedesktop.UPower",
-								  "/org/freedesktop/UPower",
-								  "org.freedesktop.UPower",
-								  "SuspendAllowed", true) ? FreedesktopUPower : 0;
-	mCapabilities |= checkForDBusInterface("org.freedesktop.DeviceKit.Power",
-								  "/org/freedesktop/DeviceKit/Power",
-								  "org.freedesktop.DeviceKit.Power",
-								  "EnumerateDevices", true) ? FreedesktopDeviceKit : 0;
-	mCapabilities |= checkForDBusInterface("org.kde.screensaver",
-								  "/ScreenSaver",
-								  "org.freedesktop.ScreenSaver",
-								  "GetActive", false) ? KdeScreenSaver : 0;
-	mCapabilities |= checkForDBusInterface("org.kde.ksmserver",
-								  "/KSMServer",
-								  "org.kde.KSMServerInterface",
-								  "canShutdown", false) ? KdeKSMServer : 0;
+	mCapabilities |= checkForDBusInterface(QStringLiteral("org.gnome.SessionManager"),
+								  QStringLiteral("/org/gnome/SessionManager"),
+								  QStringLiteral("org.gnome.SessionManager"),
+								  QStringLiteral("CanShutdown"), false) ? GnomeSessionManager : 0;
+	mCapabilities |= checkForDBusInterface(QStringLiteral("org.gnome.ScreenSaver"),
+								  QStringLiteral("/ScreenSaver"),
+								  QStringLiteral("org.gnome.ScreenSaver"),
+								  QStringLiteral("GetActive"), false) ? GnomeScreenSaver : 0;
+	mCapabilities |= checkForDBusInterface(QStringLiteral("org.freedesktop.ConsoleKit"),
+								  QStringLiteral("/org/freedesktop/ConsoleKit/Manager"),
+								  QStringLiteral("org.freedesktop.ConsoleKit.Manager"),
+								  QStringLiteral("CanRestart"), true) ? FreedesktopConsoleKit : 0;
+	mCapabilities |= checkForDBusInterface(QStringLiteral("org.freedesktop.ScreenSaver"),
+								  QStringLiteral("/ScreenSaver"),
+								  QStringLiteral("org.freedesktop.ScreenSaver"),
+								  QStringLiteral("GetActive"), false) ? FreedesktopScreenSaver : 0;
+	mCapabilities |= checkForDBusInterface(QStringLiteral("org.freedesktop.Hal"),
+								  QStringLiteral("/org/freedesktop/Hal/devices/computer"),
+								  QStringLiteral("org.freedesktop.Hal.Device.SystemPowerManagement"),
+								  QStringLiteral("canShutdown"), true) ? FreedesktopHal : 0;
+	mCapabilities |= checkForDBusInterface(QStringLiteral("org.freedesktop.UPower"),
+								  QStringLiteral("/org/freedesktop/UPower"),
+								  QStringLiteral("org.freedesktop.UPower"),
+								  QStringLiteral("SuspendAllowed"), true) ? FreedesktopUPower : 0;
+	mCapabilities |= checkForDBusInterface(QStringLiteral("org.freedesktop.DeviceKit.Power"),
+								  QStringLiteral("/org/freedesktop/DeviceKit/Power"),
+								  QStringLiteral("org.freedesktop.DeviceKit.Power"),
+								  QStringLiteral("EnumerateDevices"), true) ? FreedesktopDeviceKit : 0;
+	mCapabilities |= checkForDBusInterface(QStringLiteral("org.kde.screensaver"),
+								  QStringLiteral("/ScreenSaver"),
+								  QStringLiteral("org.freedesktop.ScreenSaver"),
+								  QStringLiteral("GetActive"), false) ? KdeScreenSaver : 0;
+	mCapabilities |= checkForDBusInterface(QStringLiteral("org.kde.ksmserver"),
+								  QStringLiteral("/KSMServer"),
+								  QStringLiteral("org.kde.KSMServerInterface"),
+								  QStringLiteral("canShutdown"), false) ? KdeKSMServer : 0;
+    mCapabilities |= checkForDBusInterface(QStringLiteral("org.freedesktop.login1"),
+                                  QStringLiteral("/org/freedesktop/login1"),
+                                  QStringLiteral("org.freedesktop.login1.Manager"),
+                                  QStringLiteral("CanPowerOff"), true) ? FreedesktopLogind : 0;
 }
 #endif

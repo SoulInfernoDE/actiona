@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ namespace ActionTools
 {
     ColorParameterDefinition::ColorParameterDefinition(const Name &name, QObject *parent)
         : ParameterDefinition(name, parent),
-		mColorEdit(0)
+		mColorEdit(nullptr)
 	{
 	}
 
@@ -42,11 +42,11 @@ namespace ActionTools
 
 	void ColorParameterDefinition::load(const ActionInstance *actionInstance)
 	{
-		mColorEdit->setFromSubParameter(actionInstance->subParameter(name().original(), "value"));
+		mColorEdit->setFromSubParameter(actionInstance->subParameter(name().original(), QStringLiteral("value")));
 	}
 
 	void ColorParameterDefinition::save(ActionInstance *actionInstance)
 	{
-		actionInstance->setSubParameter(name().original(), "value", mColorEdit->isCode(), mColorEdit->text());
+		actionInstance->setSubParameter(name().original(), QStringLiteral("value"), mColorEdit->isCode(), mColorEdit->text());
 	}
 }

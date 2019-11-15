@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,10 +18,8 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef MATCHINGPOINTLIST_H
-#define MATCHINGPOINTLIST_H
+#pragma once
 
-#include <QPair>
 #include <QPoint>
 #include <QList>
 
@@ -41,7 +39,6 @@ namespace ActionTools
         int imageIndex;
     };
 
-	typedef QList<MatchingPoint> MatchingPointList;
+    using MatchingPointList = QList<MatchingPoint>;
 }
 
-#endif // MATCHINGPOINTLIST_H

@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,13 +18,14 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef WRITEINIFILEINSTANCE_H
-#define WRITEINIFILEINSTANCE_H
+#pragma once
 
 #include "actioninstance.h"
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
+
+#include <QFileInfo>
 
 namespace Actions
 {
@@ -38,17 +39,17 @@ namespace Actions
 			UnableToWriteFileException = ActionTools::ActionException::UserException
 		};
 
-		WriteIniFileInstance(const ActionTools::ActionDefinition *definition, QObject *parent = 0)
+		WriteIniFileInstance(const ActionTools::ActionDefinition *definition, QObject *parent = nullptr)
 			: ActionTools::ActionInstance(definition, parent)											{}
 
-		void startExecution()
+		void startExecution() override
 		{
 			bool ok = true;
 
-			QString filename = evaluateString(ok, "file");
-			QString section = evaluateString(ok, "section");
-			QString parameter = evaluateString(ok, "parameter");
-			QString value = evaluateString(ok, "value");
+			QString filename = evaluateString(ok, QStringLiteral("file"));
+			QString section = evaluateString(ok, QStringLiteral("section"));
+			QString parameter = evaluateString(ok, QStringLiteral("parameter"));
+			QString value = evaluateString(ok, QStringLiteral("value"));
 
 			if(!ok)
 				return;
@@ -56,7 +57,7 @@ namespace Actions
 			if(!write(filename, section, parameter, value))
 				return;
 
-			emit executionEnded();
+			executionEnded();
 		}
 
 	private:
@@ -66,7 +67,10 @@ namespace Actions
             {
                 boost::property_tree::ptree tree;
 
-                boost::property_tree::ini_parser::read_ini(filename.toStdString(), tree);
+                QFileInfo fileInfo(filename);
+
+                if(fileInfo.isReadable())
+                    boost::property_tree::ini_parser::read_ini(filename.toStdString(), tree);
 
                 //Create/get the parameter and the value
                 boost::property_tree::ptree sectionTree;
@@ -77,7 +81,7 @@ namespace Actions
 
                 if(section.isEmpty())
                 {
-                    setCurrentParameter("filename");
+					setCurrentParameter(QStringLiteral("filename"));
                     emit executionException(UnableToWriteFileException, tr("Unable to write to the file: the section name cannot be empty"));
 
                     return false;
@@ -90,8 +94,8 @@ namespace Actions
             }
             catch(const std::runtime_error &e)
             {
-                setCurrentParameter("filename");
-                emit executionException(UnableToWriteFileException, tr("Unable to write to the file: %1").arg(e.what()));
+				setCurrentParameter(QStringLiteral("filename"));
+				emit executionException(UnableToWriteFileException, tr("Unable to write to the file: %1").arg(QString::fromUtf8(e.what())));
 
                 return false;
             }
@@ -103,4 +107,3 @@ namespace Actions
 	};
 }
 
-#endif // WRITEINIFILEINSTANCE_H

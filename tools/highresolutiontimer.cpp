@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ namespace Tools
 	int HighResolutionTimer::mLevel = 0;
 
 	HighResolutionTimer::HighResolutionTimer(const QString &taskName)
-		: mRunning(false),
+		: 
 		mTaskName(taskName),
 		mTextStream(stdout, QIODevice::WriteOnly)
 	{
@@ -65,7 +65,7 @@ namespace Tools
 #ifdef Q_OS_WIN
 		QueryPerformanceCounter(&mTimeStart);
 #else
-		gettimeofday(&mTimeStart, 0);
+		gettimeofday(&mTimeStart, nullptr);
 #endif
 	}
 
@@ -75,7 +75,7 @@ namespace Tools
 #ifdef Q_OS_WIN
 		QueryPerformanceCounter(&mTimeStop);
 #else
-		gettimeofday(&mTimeStop, 0);
+		gettimeofday(&mTimeStop, nullptr);
 #endif
 	}
 

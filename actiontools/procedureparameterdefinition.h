@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,7 @@
 	Contact : jmgr@jmgr.info
 */
 
-#ifndef PROCEDUREPARAMETERDEFINITION_H
-#define PROCEDUREPARAMETERDEFINITION_H
+#pragma once
 
 #include "listparameterdefinition.h"
 #include "actiontools_global.h"
@@ -34,9 +33,8 @@ namespace ActionTools
         ProcedureParameterDefinition(const Name &name, QObject *parent)
             : ListParameterDefinition(name, parent)						{}
 
-		void buildEditors(Script *script, QWidget *parent);
-		void actionUpdate(Script *script);
+		void buildEditors(Script *script, QWidget *parent) override;
+		void actionUpdate(Script *script) override;
 	};
 }
 
-#endif // PROCEDUREPARAMETERDEFINITION_H

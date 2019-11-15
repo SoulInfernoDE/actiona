@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -23,11 +23,9 @@
 
 #include <QColorDialog>
 #include <QDesktopWidget>
-
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#include <QRegExpValidator>
 #include <QApplication>
 #include <QScreen>
-#endif
 
 namespace ActionTools
 {
@@ -35,7 +33,7 @@ namespace ActionTools
 		: QWidget(parent),
 		ui(new Ui::ColorEdit),
         mColorDialog(new QColorDialog(this)),
-        mValidator(new QRegExpValidator(QRegExp("^\\d\\d{0,2}:\\d\\d{0,2}:\\d\\d{0,2}$", Qt::CaseSensitive, QRegExp::RegExp2), this))
+		mValidator(new QRegExpValidator(QRegExp(QStringLiteral("^\\d\\d{0,2}:\\d\\d{0,2}:\\d\\d{0,2}$"), Qt::CaseSensitive, QRegExp::RegExp2), this))
 	{
 		ui->setupUi(this);
 
@@ -104,12 +102,7 @@ namespace ActionTools
 	
     void ColorEdit::setPosition(QPointF position)
 	{
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
         QPixmap pixel = QGuiApplication::primaryScreen()->grabWindow(0, position.x(), position.y(), 1, 1);
-#else
-        QPixmap pixel = QPixmap::grabWindow(QApplication::desktop()->winId(), position.x(), position.y(), 1, 1);
-#endif
-
 		QColor pixelColor = pixel.toImage().pixel(0, 0);
 		mColorDialog->setCurrentColor(pixelColor);
 		onColorSelected();
@@ -154,7 +147,7 @@ namespace ActionTools
 		if(code)
 		{
 			QString oldText = ui->colorLineEdit->text();
-            ui->colorLineEdit->setValidator(0);
+            ui->colorLineEdit->setValidator(nullptr);
 			ui->colorLineEdit->setText(oldText);
 			ui->colorLineEdit->setPalette(palette());
 		}
@@ -169,7 +162,7 @@ namespace ActionTools
 
 	void ColorEdit::onColorSelected()
 	{
-		ui->colorLineEdit->setText(QString("%1:%2:%3")
+		ui->colorLineEdit->setText(QStringLiteral("%1:%2:%3")
 			.arg(mColorDialog->currentColor().red())
 			.arg(mColorDialog->currentColor().green())
 			.arg(mColorDialog->currentColor().blue()));
@@ -177,7 +170,7 @@ namespace ActionTools
 
 	QColor ColorEdit::currentColor() const
 	{
-		QStringList values = ui->colorLineEdit->text().split(QChar(':'));
+		QStringList values = ui->colorLineEdit->text().split(QLatin1Char(':'));
 
 		if(values.size() != 3)
 			return QColor(0, 0, 0);
@@ -193,6 +186,6 @@ namespace ActionTools
 		if(r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255)
 			return QColor(0, 0, 0);
 
-		return QColor(r, g , b);
+		return {r, g , b};
 	}
 }

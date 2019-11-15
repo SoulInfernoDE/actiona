@@ -1,6 +1,6 @@
 /*
 	Actiona
-	Copyright (C) 2008-2014 Jonathan Mercier-Ganady
+	Copyright (C) 2005 Jonathan Mercier-Ganady
 
 	Actiona is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ namespace ActionTools
 {
     DateTimeParameterDefinition::DateTimeParameterDefinition(const Name &name, QObject *parent)
         : ParameterDefinition(name, parent),
-		mDateTimeEdit(0)
+		mDateTimeEdit(nullptr)
 	{
 	}
 
@@ -42,16 +42,16 @@ namespace ActionTools
 
 	void DateTimeParameterDefinition::load(const ActionInstance *actionInstance)
 	{
-		mDateTimeEdit->setFromSubParameter(actionInstance->subParameter(name().original(), "value"));
+		mDateTimeEdit->setFromSubParameter(actionInstance->subParameter(name().original(), QStringLiteral("value")));
 	}
 
 	void DateTimeParameterDefinition::save(ActionInstance *actionInstance)
 	{
-		actionInstance->setSubParameter(name().original(), "value", mDateTimeEdit->isCode(), mDateTimeEdit->text());
+		actionInstance->setSubParameter(name().original(), QStringLiteral("value"), mDateTimeEdit->isCode(), mDateTimeEdit->text());
 	}
 
     void DateTimeParameterDefinition::setDefaultValues(ActionInstance *actionInstance)
     {
-        actionInstance->setSubParameter(name().original(), "value", QDateTime::currentDateTime());
+		actionInstance->setSubParameter(name().original(), QStringLiteral("value"), QDateTime::currentDateTime().toString(QStringLiteral("dd/MM/yyyy hh:mm:ss")));
     }
 }
