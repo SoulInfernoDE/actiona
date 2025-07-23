@@ -1,0 +1,5 @@
+add_subdirectory(data)
+add_subdirectory(device)
+add_subdirectory(internal)
+add_subdirectory(system)
+add_subdirectory(windows)
